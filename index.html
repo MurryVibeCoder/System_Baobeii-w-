@@ -768,6 +768,7 @@ async function signIn(r, keep) {
     const a = ACC.get()[r];
     if (!a) { return; }
     role = r;
+    try { localStorage.setItem('ld-active', r); } catch (e) { }   // other tabs watch this key
     try {
         sessionStorage.setItem('ld-role', r);
         keep ? localStorage.setItem('ld-keep', r) : localStorage.removeItem('ld-keep');
@@ -781,11 +782,9 @@ async function signIn(r, keep) {
     toast('Welcome, ' + a.name);
 }
 
-$('#out').onclick = () => {
-    try {
-        sessionStorage.removeItem('ld-role');
-        localStorage.removeItem('ld-keep');
-    } catch (e) { }
+/* Clears the signed-in interface from the page and shows the login screen */
+function wipeUI() {
+    try { sessionStorage.removeItem('ld-role'); } catch (e) { }
     role = null;
     events = [];
     q = '';
@@ -796,7 +795,23 @@ $('#out').onclick = () => {
     document.documentElement.classList.remove('in');
     close();
     buildLogin();
+}
+
+$('#out').onclick = () => {
+    try {
+        localStorage.removeItem('ld-keep');
+        localStorage.removeItem('ld-active');
+    } catch (e) { }
+    wipeUI();
 };
+
+/* If another tab on this device signs in as the other person, this tab is locked out at once */
+window.addEventListener('storage', e => {
+    if (e.key === 'ld-active' && role && e.newValue && e.newValue !== role) {
+        wipeUI();
+        toast('Signed out: the other account signed in on this device');
+    }
+});
 
 /* ---- Move accounts and dates to another device ---- */
 const enc = o => btoa(unescape(encodeURIComponent(JSON.stringify(o))));
@@ -804,7 +819,8 @@ const dec = s => JSON.parse(decodeURIComponent(escape(atob(s.trim()))));
 
 $('#lnkdev').onclick = () => {
     if (!role) { return; }
-    const code = enc({ acc: ACC.get(), events });
+    const all = ACC.get();
+    const code = enc({ acc: { [role]: all[role] }, events });   // only your own account, never the other person's
     open(`<h2>Link device</h2><p style="color:var(--mut);margin:0 0 8px">Copy this code, then on your other device choose “Already have an account?” on the login screen and paste it. Keep it private.</p><textarea id="js" rows="7" style="width:100%" readonly>${code}</textarea><div class="foot"><button class="btn" id="cx">Close</button><button class="btn pri" id="cp">Copy</button></div>`);
     $('#cx').onclick = close;
     $('#cp').onclick = () => {

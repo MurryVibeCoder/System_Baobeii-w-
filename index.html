@@ -7,9 +7,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* Design tokens (his skin is the :root default, her skin overrides) */
-:root{--bg:#000;--surf:#0b0810;--ink:#f1e8ff;--mut:#a994cc;--pink:#a45cff;--deep:#c79bff;--blush:#150e24;--line:#33205a;--sh:0 12px 40px -14px rgba(164,92,255,.45);color-scheme:dark;--g1:#b58bff;--g2:#6a22c9;--g3:#5a1db0;--glow1:rgba(164,92,255,.22);--glow2:rgba(164,92,255,.15);--ovl:rgba(0,0,0,.65);--pt:#d2b3ff;--dsh:rgba(164,92,255,.45);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+</style>
+<!-- His skin: removed from the page when the girlfriend signs in -->
+<style id="skin-him">
+html[data-skin="him"]{--bg:#000;--surf:#0b0810;--ink:#f1e8ff;--mut:#a994cc;--pink:#a45cff;--deep:#c79bff;--blush:#150e24;--line:#33205a;--sh:0 12px 40px -14px rgba(164,92,255,.45);color-scheme:dark;--g1:#b58bff;--g2:#6a22c9;--g3:#5a1db0;--glow1:rgba(164,92,255,.22);--glow2:rgba(164,92,255,.15);--ovl:rgba(0,0,0,.65);--pt:#d2b3ff;--dsh:rgba(164,92,255,.45)}
+</style>
+<!-- Her skin: removed from the page when the boyfriend signs in -->
+<style id="skin-her">
 html[data-skin="her"]{--bg:#fff3f8;--surf:#fff;--ink:#4a1f33;--mut:#946781;--pink:#e8588f;--deep:#b02a63;--blush:#ffe4ef;--line:#f7cfe0;--sh:0 12px 40px -14px rgba(176,42,99,.35);color-scheme:light;--g1:#ff8dbb;--g2:#d63a82;--g3:#c92d77;--glow1:#ffe4ef;--glow2:#ffe4ef;--ovl:rgba(74,31,51,.45);--pt:#f48fb8;--dsh:rgba(232,88,143,.4)}
 
+</style>
+<style>
 /* Base */
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -223,6 +232,7 @@ html.in #login{display:none}
       <div class="search"><input id="q" type="search" placeholder="Search dates (press /)" aria-label="Search dates"></div>
       <button class="btn" id="bk">Backup</button>
       <button class="btn" id="lnkdev">Link device</button>
+      <button class="btn" id="rst">Reset data</button>
       <button class="btn pri" id="new">+ New date</button>
     </div>
   </header>
@@ -764,6 +774,16 @@ $('#login').addEventListener('submit', async e => {
     signIn(r, el.keep.checked);
 });
 
+/* Removes the other person's interface from the running page */
+function purgeOther(r) {
+    const o = r === 'her' ? 'him' : 'her';
+    const s = document.getElementById('skin-' + o);
+    if (s) { s.remove(); }          // their colours and theme
+    delete PAL[o];                  // their category colours
+    delete TXT[o];                  // their title and tagline
+    if (o === 'her') { lilyHer = () => ''; } else { lilyHim = () => ''; }   // their artwork
+}
+
 async function signIn(r, keep) {
     const a = ACC.get()[r];
     if (!a) { return; }
@@ -775,6 +795,7 @@ async function signIn(r, keep) {
     } catch (e) { }
     events = await DB.all();
     $('#login').innerHTML = '';              // the other login pane is removed from the page
+    purgeOther(r);                           // and so is the other person's whole interface
     document.documentElement.classList.add('in');
     $('#who').textContent = 'Hi, ' + a.name;
     setSkin(r);
@@ -794,7 +815,7 @@ function wipeUI() {
     $('#who').textContent = '';
     document.documentElement.classList.remove('in');
     close();
-    buildLogin();
+    location.reload();   // fresh page: the removed interface only exists again on the login screen
 }
 
 $('#out').onclick = () => {
@@ -808,8 +829,8 @@ $('#out').onclick = () => {
 /* If another tab on this device signs in as the other person, this tab is locked out at once */
 window.addEventListener('storage', e => {
     if (e.key === 'ld-active' && role && e.newValue && e.newValue !== role) {
+        try { sessionStorage.setItem('ld-msg', 'Signed out: the other account signed in on this device'); } catch (x) { }
         wipeUI();
-        toast('Signed out: the other account signed in on this device');
     }
 });
 
@@ -848,6 +869,28 @@ async function importDevice() {
     }
 }
 
+/* ---- Reset data on this device ---- */
+$('#rst').onclick = async () => {
+    if (!role) { return; }
+    if (!confirm('Delete ALL dates on this device? This cannot be undone.')) { return; }
+    const withAccounts = confirm('Also delete the saved accounts and passcodes on this device?\n\nOK = delete accounts too\nCancel = keep the accounts');
+    for (const o of events.slice()) { await DB.del(o.id); }
+    events = [];
+    if (withAccounts) {
+        try {
+            localStorage.removeItem('ld-acc');
+            localStorage.removeItem('ld-keep');
+            localStorage.removeItem('ld-active');
+            sessionStorage.removeItem('ld-role');
+        } catch (e) { }
+        window._acc = {};
+        location.reload();
+        return;
+    }
+    render(true);
+    toast('All dates deleted');
+};
+
 function startAuth() {
     let r = null;
     try { r = sessionStorage.getItem('ld-role') || localStorage.getItem('ld-keep'); } catch (e) { }
@@ -872,6 +915,10 @@ function startAuth() {
     if (!DB.ok) { toast('Storage is unavailable, so dates last only for this visit'); }
     events = [];   // nothing is loaded until a role signs in
     startAuth();
+    try {
+        const m = sessionStorage.getItem('ld-msg');
+        if (m) { sessionStorage.removeItem('ld-msg'); toast(m); }
+    } catch (e) { }
 })();
 </script>
 </body>

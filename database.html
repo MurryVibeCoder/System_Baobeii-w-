@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lily &amp; Lotus · Local database</title>
+<style>
+:root{--bg:#f4f5f7;--surf:#fff;--ink:#1f2328;--mut:#656d76;--pink:#0b66d0;--deep:#1f2328;--line:#d8dce1;--blush:#f0f2f5;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#16181b;--surf:#1f2226;--ink:#e6e8eb;--mut:#9aa1a9;--pink:#4a9df8;--deep:#e6e8eb;--line:#343a40;--blush:#272b30}}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);padding:20px 14px 50px}
+main{max-width:980px;margin:0 auto}
+h1{margin:0 0 4px;color:var(--deep);font-size:22px;font-weight:600}
+h2{margin:0 0 10px;font-size:16px;font-weight:600;color:var(--deep)}
+p.s{margin:0 0 16px;color:var(--mut)}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--blush);border:1px solid var(--line);border-radius:4px;padding:8px 12px}
+.stat b{display:block;font-size:20px;font-weight:600}
+.stat span{font-size:12px;color:var(--mut)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,input,textarea{font:inherit;color:inherit}
+button{border:1px solid var(--line);background:var(--surf);border-radius:4px;padding:6px 12px;cursor:pointer}
+button:hover{background:var(--blush)}
+button.pri{background:var(--pink);color:#fff;border-color:var(--pink)}
+button.dng{color:#c62828;border-color:#e5b4b4}
+input[type=search]{flex:1;min-width:160px;padding:7px 10px;border-radius:4px;border:1px solid var(--line);background:var(--surf)}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mut);font-weight:600;font-size:12px;background:var(--blush)}
+td.t{white-space:normal;min-width:160px}
+.empty{color:var(--mut);padding:14px 0;text-align:center}
+textarea{width:100%;min-height:130px;border:1px solid var(--line);border-radius:4px;padding:10px;background:var(--surf);margin-top:10px}
+.msg{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:4px;display:none}
+</style>
+</head>
+<body>
+<main>
+  <h1>Local database</h1>
+  <p class="s">What is saved in this browser for Lily &amp; Lotus Dates. Open this page from the same site as the calendar, because browser storage is separate for each site. Passcodes are never shown.</p>
+
+  <section class="card"><div class="stats" id="stats"></div></section>
+
+  <section class="card">
+    <h2>Accounts</h2>
+    <div class="wrap" id="acc"></div>
+  </section>
+
+  <section class="card">
+    <h2>Dates</h2>
+    <div class="tools" style="margin-bottom:10px">
+      <input type="search" id="q" placeholder="Search title, place, notes" aria-label="Search dates">
+      <button id="refresh">Refresh</button>
+    </div>
+    <div class="wrap" id="dates"></div>
+  </section>
+
+  <section class="card">
+    <h2>Export, import and reset</h2>
+    <div class="tools">
+      <button id="exp">Export dates</button>
+      <button id="imp">Import dates</button>
+      <button class="dng" id="clrd">Delete all dates</button>
+      <button class="dng" id="clra">Delete all accounts</button>
+      <button class="dng" id="all">Reset everything</button>
+    </div>
+    <textarea id="js" placeholder="Export puts your dates here as text. To import, paste a saved export here and press Import dates."></textarea>
+  </section>
+</main>
+<div class="msg" id="msg" role="status"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const LABEL = { her: 'Girlfriend', him: 'Boyfriend' };
+let db = null, events = [], acc = {};
+
+function say(t) {
+  const m = $('#msg');
+  m.textContent = t; m.style.display = 'block';
+  clearTimeout(say.t); say.t = setTimeout(() => m.style.display = 'none', 2600);
+}
+
+/* Same database and store the calendar uses */
+function openDB() {
+  return new Promise((ok, no) => {
+    const r = indexedDB.open('lily-lotus-dates', 1);
+    r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains('events')) r.result.createObjectStore('events', { keyPath: 'id' }); };
+    r.onsuccess = () => ok(r.result);
+    r.onerror = () => no(r.error);
+  });
+}
+const tx = (mode, fn) => new Promise((ok, no) => {
+  const r = fn(db.transaction('events', mode).objectStore('events'));
+  r.onsuccess = () => ok(r.result);
+  r.onerror = () => no(r.error);
+});
+
+function readAcc() { try { return JSON.parse(localStorage.getItem('ld-acc') || '{}'); } catch (e) { return {}; } }
+function ls(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+async function load() {
+  events = db ? await tx('readonly', s => s.getAll()) : [];
+  events.sort((a, b) => ((a.date || '') + (a.start || '')).localeCompare((b.date || '') + (b.start || '')));
+  acc = readAcc();
+  draw();
+}
+
+function draw() {
+  const keep = ls('ld-keep'), active = ls('ld-active');
+  $('#stats').innerHTML =
+    `<div class="stat"><b>${events.length}</b><span>dates saved</span></div>` +
+    `<div class="stat"><b>${Object.keys(acc).length}</b><span>accounts</span></div>` +
+    `<div class="stat"><b>${keep ? LABEL[keep] || esc(keep) : 'None'}</b><span>kept signed in</span></div>` +
+    `<div class="stat"><b>${active ? LABEL[active] || esc(active) : 'None'}</b><span>last active</span></div>`;
+
+  const roles = Object.keys(acc);
+  $('#acc').innerHTML = roles.length
+    ? '<table><tr><th>Role</th><th>Name</th><th>Passcode</th><th></th></tr>' + roles.map(r =>
+        `<tr><td>${LABEL[r] || esc(r)}</td><td>${esc(acc[r].name)}</td><td>saved (hidden)</td><td><button class="dng" data-ra="${esc(r)}">Remove</button></td></tr>`).join('') + '</table>'
+    : '<div class="empty">No accounts on this device.</div>';
+
+  const q = $('#q').value.trim().toLowerCase();
+  const L = events.filter(e => !q || [e.title, e.place, e.notes].join(' ').toLowerCase().includes(q));
+  $('#dates').innerHTML = L.length
+    ? '<table><tr><th>Date</th><th>Time</th><th>Title</th><th>Category</th><th>Place</th><th>Done</th><th></th></tr>' + L.map(e =>
+        `<tr><td>${esc(e.date)}</td><td>${esc(e.start || '')}${e.end ? '–' + esc(e.end) : ''}</td><td class="t">${esc(e.title)}</td><td>${esc(e.cat)}</td><td>${esc(e.place)}</td><td>${e.done ? 'Yes' : 'No'}</td><td><button class="dng" data-rd="${esc(e.id)}">Delete</button></td></tr>`).join('') + '</table>'
+    : `<div class="empty">${events.length ? 'No dates match your search.' : 'No dates saved.'}</div>`;
+}
+
+document.addEventListener('click', async e => {
+  const rd = e.target.closest('[data-rd]'), ra = e.target.closest('[data-ra]');
+  if (rd) {
+    if (!confirm('Delete this date?')) return;
+    await tx('readwrite', s => s.delete(rd.dataset.rd));
+    await load(); say('Date deleted');
+  } else if (ra) {
+    const r = ra.dataset.ra;
+    if (!confirm(`Remove the ${LABEL[r] || r} account from this device? Its passcode will be gone.`)) return;
+    const a = readAcc(); delete a[r];
+    localStorage.setItem('ld-acc', JSON.stringify(a));
+    if (ls('ld-keep') === r) localStorage.removeItem('ld-keep');
+    if (ls('ld-active') === r) localStorage.removeItem('ld-active');
+    await load(); say('Account removed');
+  }
+});
+
+$('#q').oninput = draw;
+$('#refresh').onclick = async () => { await load(); say('Refreshed'); };
+
+$('#exp').onclick = () => { $('#js').value = JSON.stringify(events); $('#js').select(); say('Dates exported below. Copy the text.'); };
+
+$('#imp').onclick = async () => {
+  try {
+    const a = JSON.parse($('#js').value);
+    if (!Array.isArray(a)) throw 0;
+    let n = 0;
+    for (const o of a) if (o && o.id && o.title && o.date) { await tx('readwrite', s => s.put(o)); n++; }
+    await load(); say(`${n} dates imported`);
+  } catch (e) { say('That text is not a valid export'); }
+};
+
+$('#clrd').onclick = async () => {
+  if (!confirm('Delete ALL dates on this device? This cannot be undone.')) return;
+  await tx('readwrite', s => s.clear());
+  await load(); say('All dates deleted');
+};
+
+$('#clra').onclick = async () => {
+  if (!confirm('Delete ALL accounts and passcodes on this device?')) return;
+  ['ld-acc', 'ld-keep', 'ld-active'].forEach(k => { try { localStorage.removeItem(k); } catch (e) { } });
+  await load(); say('All accounts deleted');
+};
+
+$('#all').onclick = async () => {
+  if (!confirm('Reset EVERYTHING on this device (all dates, accounts and passcodes)? This cannot be undone.')) return;
+  await tx('readwrite', s => s.clear());
+  ['ld-acc', 'ld-keep', 'ld-active'].forEach(k => { try { localStorage.removeItem(k); } catch (e) { } });
+  try { sessionStorage.clear(); } catch (e) { }
+  await load(); say('Everything was reset');
+};
+
+(async () => {
+  try { db = await openDB(); } catch (e) { say('Browser storage is unavailable here'); }
+  load();
+})();
+</script>
+</body>
+</html>

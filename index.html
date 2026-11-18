@@ -117,7 +117,7 @@ small{color:var(--mut)}
 
 /* Login */
 #login{position:fixed;inset:0;z-index:60;display:flex;background:#000}
-#login .lt{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:3;padding:8px 22px;border-radius:99px;background:rgba(20,10,30,.6);backdrop-filter:blur(10px);color:#fff;font:600 italic 22px "Cormorant Garamond",Georgia,serif;margin:0;white-space:nowrap;pointer-events:none}
+#login .lt{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:3;padding:8px 22px;border-radius:99px;background:rgba(20,10,30,.6);backdrop-filter:blur(10px);color:#fff;font:600 italic 22px "Cormorant Garamond",Georgia,serif;margin:0;white-space:nowrap;pointer-events:none;-webkit-text-fill-color:#fff;-webkit-background-clip:border-box;background-clip:border-box;background-size:auto;animation:none}
 #lkimp{position:absolute;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:3;min-height:40px;padding:8px 16px;border-radius:99px;background:rgba(20,10,30,.55);backdrop-filter:blur(8px);color:#fff;opacity:.92;text-decoration:none}
 .pane{flex:1;position:relative;display:grid;place-items:center;padding:70px 20px 70px;cursor:pointer;overflow:hidden;transition:flex .8s cubic-bezier(.2,.9,.2,1)}
 .pane::before,.pane::after{content:"";position:absolute;width:60vmax;height:60vmax;border-radius:50%;filter:blur(80px);opacity:.45;pointer-events:none;animation:aur 16s ease-in-out infinite alternate}
@@ -188,6 +188,94 @@ input,select,textarea{font-size:16px!important}
 .pane.open .lg .lily{transform:scale(.6)}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+html:not(.in){--surf:#fff;--ink:#4a1f33;--bg:#fff3f8;--line:#f7cfe0;--blush:#ffe4ef;--deep:#b02a63;--mut:#946781;--pink:#e8588f;--g1:#ff8dbb;--g2:#d63a82;--ovl:rgba(74,31,51,.5);--dsh:rgba(232,88,143,.4)}
+html:not(.in) .ov{z-index:80}
+#lhelp{position:fixed;z-index:65;top:calc(14px + env(safe-area-inset-top,0px));right:14px;width:42px;height:42px;padding:0;border-radius:50%;font:600 20px "Cormorant Garamond",Georgia,serif;background:rgba(20,10,30,.6);color:#fff;border:0;backdrop-filter:blur(10px)}
+html.in #lhelp{display:none}
+.help{max-height:62vh;max-height:62dvh;overflow:auto;margin:0 -4px;padding:0 4px}
+.help p{margin:0 0 10px;color:var(--mut)}
+.help details{border:1px solid var(--line);border-radius:16px;padding:11px 14px;margin-bottom:8px;background:var(--blush);transition:border-color .25s}
+.help details[open]{border-color:var(--pink)}
+.help summary{font-weight:600;cursor:pointer;color:var(--deep);list-style:none;display:flex;justify-content:space-between;gap:10px;min-height:28px;align-items:center}
+.help summary::-webkit-details-marker{display:none}
+.help summary::after{content:"+";font-size:20px;line-height:1;transition:transform .3s var(--ease)}
+.help details[open] summary::after{transform:rotate(45deg)}
+.help details>div{padding-top:8px;animation:fade .35s}
+.help ol,.help ul{margin:6px 0;padding-left:20px}
+.help li{margin:4px 0}
+.help .tip{margin-top:8px;padding:8px 12px;border-radius:12px;background:var(--surf);color:var(--ink);font-size:14px}
+
+/* Neutral palette for the Help modal */
+.modal.neutral{
+  --pink:#6b7280; --deep:#1f2937; --blush:#f3f4f6; --line:#e5e7eb;
+  --mut:#6b7280; --ink:#1f2937; --surf:#fff; --bg:#fafafa;
+  --g1:#6b7280; --g2:#374151; --dsh:rgba(0,0,0,.25);
+  color:var(--ink);
+}
+.modal.neutral.dark{
+  --pink:#9ca3af; --deep:#f3f4f6; --blush:#1a1a1d; --line:#2e2e33;
+  --mut:#9ca3af; --ink:#f3f4f6; --surf:#0e0e10; --bg:#000;
+  --g1:#9ca3af; --g2:#4b5563;
+}
+
+/* ===== Refinement layer ===== */
+::selection{background:color-mix(in srgb,var(--pink) 30%,transparent)}
+*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--pink) 40%,transparent) transparent}
+html{scroll-behavior:smooth}
+
+/* Fine paper grain over everything, barely visible, removes the flat digital look */
+body::after{content:"";position:fixed;inset:0;z-index:1000;pointer-events:none;opacity:.045;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* Header: hairline plus a soft glow instead of a hard border */
+.top{border-bottom-color:transparent;box-shadow:0 1px 0 var(--line),0 18px 36px -28px var(--dsh)}
+#logo{box-shadow:0 0 44px -10px var(--dsh)}
+.who{letter-spacing:.01em}
+
+/* Surfaces: gradient hairline edge and an inner highlight give glass depth */
+.card{border-color:transparent;background:linear-gradient(180deg,color-mix(in srgb,var(--surf) 90%,transparent),color-mix(in srgb,var(--surf) 68%,transparent));box-shadow:var(--sh),inset 0 1px 0 color-mix(in srgb,#fff 22%,transparent)}
+.card::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;background:linear-gradient(160deg,color-mix(in srgb,var(--pink) 45%,transparent),transparent 36%,transparent 64%,color-mix(in srgb,var(--g2) 32%,transparent));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.next::after{opacity:.35}
+
+/* Buttons: glass base, and a single light sweep on primary actions only */
+.btn{background:color-mix(in srgb,var(--surf) 85%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.btn.pri,.go,.fab{box-shadow:0 12px 26px -12px var(--dsh),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn.pri::after,.go::after,.fab::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.42) 50%,transparent 70%);transform:translateX(-120%);transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+@media (hover:hover){.btn.pri:hover::after,.go:hover::after,.fab:hover::after{transform:translateX(120%)}}
+.nav .btn{min-width:42px;padding:8px 14px}
+
+/* Calendar: quieter cells, one clear focal point (today) */
+.bar h2{font-style:italic;letter-spacing:-.01em}
+.wk div{font-size:12px;letter-spacing:.04em}
+.cell{background:linear-gradient(160deg,color-mix(in srgb,var(--blush) 58%,var(--surf)),color-mix(in srgb,var(--blush) 20%,var(--surf)));border-color:color-mix(in srgb,var(--line) 70%,transparent)}
+.cell.today{background:linear-gradient(160deg,color-mix(in srgb,var(--pink) 18%,var(--surf)),color-mix(in srgb,var(--blush) 40%,var(--surf)));box-shadow:0 0 0 1px var(--pink),0 12px 28px -14px var(--pink)}
+.n{font-variant-numeric:tabular-nums}
+.pill{box-shadow:0 5px 10px -6px var(--c),inset 0 1px 0 rgba(255,255,255,.3);transition:transform .2s var(--ease),filter .2s}
+@media (hover:hover){.pill:hover{transform:translateY(-1px);filter:saturate(1.15)}}
+.chip.on{box-shadow:0 8px 18px -10px var(--pink)}
+
+/* Sidebar */
+.next h3{text-shadow:0 2px 20px rgba(0,0,0,.18)}
+.item{background:linear-gradient(90deg,color-mix(in srgb,var(--c) 16%,var(--blush)),var(--blush) 75%);transition:transform .25s var(--ease),box-shadow .25s}
+.item:nth-child(2){animation-delay:.05s}.item:nth-child(3){animation-delay:.1s}.item:nth-child(4){animation-delay:.15s}.item:nth-child(5){animation-delay:.2s}
+@media (hover:hover){.item:hover{transform:translateX(4px);box-shadow:var(--sh)}}
+
+/* Modals */
+.ov{backdrop-filter:blur(10px) saturate(1.2);-webkit-backdrop-filter:blur(10px) saturate(1.2)}
+.modal{border:1px solid var(--line);box-shadow:0 40px 90px -30px #000,inset 0 1px 0 color-mix(in srgb,#fff 20%,transparent)}
+.modal h2{font-style:italic}
+.f input:hover,.f select:hover,.f textarea:hover,.modal textarea:hover{border-color:color-mix(in srgb,var(--pink) 45%,var(--line))}
+.help details:hover{border-color:color-mix(in srgb,var(--pink) 50%,var(--line))}
+.help details[open]{box-shadow:0 12px 26px -18px var(--dsh)}
+.toast{border:1px solid color-mix(in srgb,#fff 16%,transparent)}
+
+/* Login: a clear seam between the two worlds, glassier open panel */
+#login .lt{letter-spacing:.02em;border:1px solid rgba(255,255,255,.16);box-shadow:0 12px 32px -12px rgba(0,0,0,.55)}
+#lkimp{border:1px solid rgba(255,255,255,.14)}
+.pane.him{box-shadow:inset 1px 0 0 rgba(255,255,255,.12)}
+.pane.open .box{box-shadow:0 36px 80px -34px var(--a),inset 0 1px 0 rgba(255,255,255,.22)}
+.pane .sub{letter-spacing:.01em}
+@media (max-width:700px){.pane.him{box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}}
 </style>
 </head>
 <body>
@@ -197,7 +285,7 @@ input,select,textarea{font-size:16px!important}
     <div class="brand"><span id="logo"></span><div><h1 id="h1"></h1><p id="tag"></p></div></div>
     <div class="actions">
       <span class="who" id="who"></span>
-      <button class="btn" id="out">Log out</button>
+      <button class="btn" id="prof">Profile</button><button class="btn" id="hlp">Help</button><button class="btn" id="out">Log out</button>
       <button class="btn" id="bk">Backup</button>
       <button class="btn" id="lnkdev">Link device</button>
       <button class="btn" id="rst">Reset data</button>
@@ -222,6 +310,7 @@ input,select,textarea{font-size:16px!important}
 <div class="ov" id="ov"><div class="modal" id="md" role="dialog" aria-modal="true"></div></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <div id="login" role="dialog" aria-label="Sign in"></div>
+<button class="btn" id="lhelp" aria-label="Help">?</button>
 
 <script>
 /* ---------- Themes ---------- */
@@ -390,7 +479,12 @@ function buildChips() {
 }
 
 /* ---------- Modals ---------- */
-function open(h) { $('#md').innerHTML = h; $('#ov').classList.add('show'); const f = $('#md input,#md textarea'); f && f.focus(); }
+function open(h, cls = '') {
+  $('#md').className = 'modal ' + cls;
+  $('#md').innerHTML = h;
+  $('#ov').classList.add('show');
+  const f = $('#md input,#md textarea'); f && f.focus();
+}
 function close() { $('#ov').classList.remove('show'); }
 function form(id, date) {
   const e = events.find(x => x.id === id) || { date: date || sel, start: '18:00', end: '20:00', cat: 'date', title: '', place: '', notes: '' };
@@ -627,6 +721,64 @@ function setFx() {
 }
 const _applyTheme = applyTheme;
 applyTheme = function (r) { _applyTheme(r); setFx(); const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = THEME[r].v.bg; };
+
+/* ---------- Help (neutral palette) ---------- */
+function showHelp() {
+  open(HELP_HTML, 'neutral' + (role && THEME[role].dark ? ' dark' : ''));
+  $('#cx').onclick = close;
+}
+const HELP_HTML = `<h2>How to use</h2><div class="help">
+<p>Tap a section to open it.</p>
+<details open><summary>Plan a date</summary><div><ol><li>Tap a day on the calendar, or press <b>+</b> (<b>+ New date</b> on a computer).</li><li>Add a title, the time, place and notes, then tap <b>Save date</b>.</li><li>Tap a date on the calendar or in <b>Coming up</b> to edit or delete it.</li></ol><div class="tip">Dates are shared: both of you see the same calendar on this device. A warning appears if two dates overlap.</div></div></details>
+<details><summary>Find your way around</summary><div><ul><li><b>‹ ›</b> change month, <b>Today</b> jumps back.</li><li>The colored chips filter by category (Date night, Family, Work…).</li><li><b>Next up</b> shows your very next date.</li><li>On a phone, dots on a day mean there are dates. Open <b>Coming up</b> to read them.</li></ul></div></details>
+<details><summary>Use it on another phone or computer</summary><div><ol><li>On the device where you’re signed in, tap <b>Link device</b> and enter your passcode.</li><li>Tap <b>Copy</b> to copy the code.</li><li>On the new device, open this same page and tap <b>Already have an account on another device?</b></li><li>Paste the code into the box that appears, then press OK.</li><li>Pick your side and sign in with your passcode.</li></ol><div class="tip">Paste the code only in that box, never in the browser’s address bar. Each of you links your own account. The code copies your dates once, so make a new code later to catch up.</div></div></details>
+<details><summary>Keep a backup</summary><div><p>Tap <b>Backup</b> and copy the text to save your dates somewhere safe. To restore, paste it into the same box and tap <b>Import</b>. Clearing your browser’s data deletes your dates, so back up now and then.</p></div></details>
+<details><summary>Passcode and signing in</summary><div><ul><li>Your passcode needs 6 or more characters.</li><li>When you create an account you get a <b>recovery code</b>. Write it down, it’s shown only once.</li><li>Forgot your passcode? Tap <b>Forgot passcode?</b> and enter the recovery code.</li><li><b>Keep me signed in</b> lasts 14 days on that device.</li><li>After several wrong tries you have to wait a little before trying again.</li></ul></div></details>
+<details><summary>Edit your profile</summary><div><ul><li>Tap <b>Profile</b> to change your name, passcode or recovery code.</li><li>Changing the passcode or recovery code needs your current passcode.</li><li>Changes apply to this device. On another device, make a new <b>Link device</b> code to update it.</li></ul></div></details>
+<details><summary>Log out and reset</summary><div><p><b>Log out</b> returns to the sign-in screen. <b>Reset data</b> deletes all dates on this device after you enter your passcode. It can’t be undone, so back up first.</p></div></details>
+</div><div class="foot"><button class="btn pri" id="cx">Got it</button></div>`;
+$('#hlp').onclick = showHelp;
+/* ---------- Edit profile ---------- */
+function editProfile() {
+  const a = ACC.get()[role];
+  open(`<h2>Edit profile</h2><form id="pf" class="f" autocomplete="off">
+<label class="w">Name<input name="name" required maxlength="24" value="${esc(a.name)}"></label>
+<label class="w">Current passcode <small>Only needed to change your passcode or recovery code</small><input name="cur" type="password" autocomplete="current-password"></label>
+<label>New passcode<input name="np" type="password" autocomplete="new-password" placeholder="6+ characters"></label>
+<label>Confirm<input name="cp" type="password" autocomplete="new-password"></label>
+<label class="w" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="rc" style="width:18px;height:18px;padding:0"> Generate a new recovery code</label>
+<div class="err w" id="pe" role="alert"></div>
+<div class="foot w"><button type="button" class="btn" id="cx">Cancel</button><button class="btn pri">Save profile</button></div></form>`);
+  $('#cx').onclick = close;
+  $('#pf').onsubmit = async ev => {
+    ev.preventDefault();
+    const el = ev.target.elements, err = $('#pe'), acc = ACC.get(), x = acc[role];
+    const name = el.name.value.trim(), np = el.np.value, cp = el.cp.value, wantRc = el.rc.checked;
+    let rc = '';
+    err.textContent = '';
+    if (!name) { err.textContent = 'Enter a name.'; return; }
+    if (np || cp || wantRc) {
+      if (waitMs()) { err.textContent = tooMany(); return; }
+      if (await kdf(el.cur.value, x.salt, x.it) !== x.h) { noteFail(); err.textContent = waitMs() ? tooMany() : 'Your current passcode is incorrect.'; return; }
+      LS.d('ld-fail');
+      if (np || cp) {
+        if (np.length < 6) { err.textContent = 'The new passcode needs at least 6 characters.'; return; }
+        if (np !== cp) { err.textContent = 'The new passcodes don’t match.'; return; }
+        x.salt = rnd(16); x.h = await kdf(np, x.salt, x.it);
+      }
+      if (wantRc) { rc = recCode(); x.rs = rnd(16); x.rh = await kdf(rc, x.rs); }
+    }
+    x.name = name; ACC.set(acc);
+    $('#who').textContent = 'Hi, ' + name;
+    close(); toast('Profile updated');
+    if (rc) alert(`Your new recovery code. Write it down now, it is shown only once:\n\n${rc}\n\nThe old recovery code no longer works.`);
+  };
+}
+$('#prof').onclick = editProfile;
+
+$('#lhelp').onclick = showHelp;
+document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); if (!role && e.target === $('#ov')) close(); });
+$('#ov').addEventListener('click', e => { if (e.target === $('#ov')) close(); });
 </script>
 </body>
 </html>

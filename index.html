@@ -6,111 +6,71 @@
 <title>Lily &amp; Lotus Dates</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* Colours come from the signed-in person's theme (set by JavaScript) */
 :root{--sh:0 12px 40px -14px var(--dsh)}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;font:15px/1.5 Figtree,system-ui,sans-serif;color:var(--ink);background:radial-gradient(900px 500px at 85% -10%,var(--glow),transparent 60%),var(--bg);overflow-x:hidden;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+body{margin:0;min-height:100vh;font:15px/1.5 Figtree,system-ui,sans-serif;color:var(--ink);background:radial-gradient(900px 500px at 85% -10%,var(--glow),transparent 60%),var(--bg);padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:3px solid var(--pink);outline-offset:2px}
-html:not(.in) .app,html:not(.in) .garden{visibility:hidden}
+html:not(.in) .app{visibility:hidden}
 #login:empty{display:none}
-.serif,h1,h2,h3,.who,.stats b,.day{font-family:"Cormorant Garamond",Georgia,serif}
-
-/* Flowers */
-.p{transform-box:view-box;transform-origin:var(--o,50px 50px);transform:rotate(var(--r))}
-.bloom .p{animation:open 1.6s cubic-bezier(.2,1.5,.4,1) backwards;animation-delay:calc(var(--i)*110ms)}
-.bloom .st,.bloom .w{animation:fade 1s 1s backwards}
-@keyframes open{from{transform:rotate(calc(var(--r) - 40deg)) scale(0);opacity:0}}
+h1,h2,h3,.who{font-family:"Cormorant Garamond",Georgia,serif}
 @keyframes fade{from{opacity:0}}
-@keyframes sway{to{transform:rotate(8deg)}}
-@keyframes drift{to{transform:translate(24px,-34px) rotate(var(--rot))}}
-@keyframes rise{from{opacity:0;transform:translateY(16px) scale(.9)}}
-@keyframes pulse{70%{box-shadow:0 0 0 9px transparent}}
-.garden{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.garden .lily{position:absolute;opacity:.13;animation:drift var(--t) ease-in-out infinite alternate}
+@keyframes shake{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
 
-/* Header */
-.app{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:18px 16px 40px}
+.app{max-width:1200px;margin:0 auto;padding:18px 16px 40px}
 .top{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:18px}
 .brand{display:flex;align-items:center;gap:12px}
-.brand .lily{width:76px;height:76px;filter:drop-shadow(0 6px 10px var(--dsh));animation:sway 6s ease-in-out infinite alternate}
-h1{font-size:clamp(30px,5vw,44px);line-height:1;margin:0;color:var(--deep)}
+.brand .lily{width:70px;height:70px;filter:drop-shadow(0 6px 10px var(--dsh))}
+h1{font-size:clamp(30px,5vw,42px);line-height:1;margin:0;color:var(--deep)}
 .brand p{margin:2px 0 0;color:var(--mut);font:italic 18px "Cormorant Garamond",Georgia,serif}
 .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.who{font-style:italic;font-weight:600;font-size:21px;color:var(--deep);padding:0 4px}
-.search input{width:210px;max-width:100%;padding:10px 14px;border-radius:99px;border:1.5px solid var(--line);background:var(--surf);transition:.25s}
-.search input:focus{width:260px;border-color:var(--pink);outline:0}
+.who{font-style:italic;font-weight:600;font-size:21px;color:var(--deep)}
 .btn{border:1.5px solid var(--line);background:var(--surf);padding:9px 15px;border-radius:99px;font-weight:500;transition:transform .2s,box-shadow .2s}
 .btn:hover{transform:translateY(-2px);box-shadow:var(--sh)}
 .btn.pri{background:linear-gradient(135deg,var(--g1),var(--pink) 50%,var(--g2));color:#fff;border:0}
-
-/* Layout and calendar */
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:18px}
 .card{background:var(--surf);border:1px solid var(--line);border-radius:26px;box-shadow:var(--sh);padding:18px}
 .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
-.bar h2{font-size:clamp(26px,4vw,34px);line-height:1;margin:0;min-width:190px;color:var(--deep)}
+.bar h2{font-size:clamp(26px,4vw,34px);line-height:1;margin:0;color:var(--deep)}
 .nav{display:flex;gap:6px}
-.nav .btn{padding:8px 13px}
-.seg{display:inline-flex;background:var(--blush);border-radius:99px;padding:3px}
-.seg button{border:0;background:none;padding:6px 14px;border-radius:99px;color:var(--mut);font-weight:500}
-.seg .on{background:var(--surf);color:var(--deep);box-shadow:0 2px 8px var(--dsh)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .chip{border:1.5px solid var(--line);background:none;border-radius:99px;padding:4px 12px;font-size:13px;display:flex;align-items:center;gap:6px}
 .chip i{width:9px;height:9px;border-radius:50%;background:var(--c,var(--pink))}
 .chip.on{background:var(--blush);border-color:var(--pink);color:var(--deep)}
 .wk,.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
-.wk div{text-align:center;color:var(--mut);font-size:13px;font-weight:600;padding:4px 0}
-.cell{min-height:96px;border-radius:16px;border:1px solid var(--line);background:color-mix(in srgb,var(--blush) 35%,var(--surf));padding:6px;text-align:left;display:flex;flex-direction:column;gap:3px;overflow:hidden;transition:transform .2s,box-shadow .2s}
-.cell:hover{transform:translateY(-3px) scale(1.02);box-shadow:var(--sh);border-color:var(--pink);z-index:2}
+.wk div{text-align:center;color:var(--mut);font-size:13px;font-weight:600}
+.cell{min-height:92px;border-radius:16px;border:1px solid var(--line);background:color-mix(in srgb,var(--blush) 35%,var(--surf));padding:6px;display:flex;flex-direction:column;gap:3px;overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.cell:hover{transform:translateY(-3px);box-shadow:var(--sh);border-color:var(--pink)}
 .cell.out{opacity:.45}
-.cell.sel{border-color:var(--pink);box-shadow:0 0 0 3px color-mix(in srgb,var(--pink) 28%,transparent)}
-.cell.today .n{background:var(--pink);color:#fff;animation:pulse 2.4s infinite;box-shadow:0 0 0 0 var(--pink)}
+.cell.today .n{background:var(--pink);color:#fff}
 .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:13px}
 .pill{border:0;border-radius:8px;padding:2px 6px;font-size:11.5px;text-align:left;color:#fff;background:var(--c);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
 .pill.done{opacity:.5;text-decoration:line-through}
 .more{font-size:11px;color:var(--mut)}
-.enter .cell{animation:rise .55s cubic-bezier(.2,.9,.3,1.2) backwards;animation-delay:calc(var(--d)*14ms)}
-
-/* Sidebar */
 .side{display:flex;flex-direction:column;gap:18px}
-.next{background:linear-gradient(150deg,var(--g1),var(--pink) 55%,var(--g2));color:#fff;border:0;position:relative;overflow:hidden}
-.next .lily{position:absolute;right:-26px;bottom:-30px;width:150px;opacity:.28;animation:sway 7s ease-in-out infinite alternate}
+.next{background:linear-gradient(150deg,var(--g1),var(--pink) 55%,var(--g2));color:#fff;border:0}
 .next h3{font-size:26px;line-height:1.1;margin:4px 0}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
-.stats b{display:block;font-size:30px;line-height:1;color:var(--deep)}
-.stats span{font-size:12px;color:var(--mut)}
 .side h3.t{margin:0 0 10px;font-size:22px;color:var(--deep)}
-.item{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:14px;border:0;border-left:5px solid var(--c);background:var(--blush);margin-bottom:8px;width:100%;text-align:left}
+.item{display:block;padding:9px 10px;border-radius:14px;border:0;border-left:5px solid var(--c);background:var(--blush);margin-bottom:8px;width:100%;text-align:left}
 .item b{display:block;font-weight:600}
 small{color:var(--mut)}
 .next small{color:inherit;opacity:.9}
-.ag{display:flex;flex-direction:column;gap:8px}
-.day{font-size:20px;font-weight:700;color:var(--deep);margin:10px 0 2px}
-.row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;background:var(--blush);border-left:6px solid var(--c);animation:rise .4s backwards}
-.row .tx{flex:1;min-width:0}
-.row.done .tx b{text-decoration:line-through;opacity:.55}
-.row input{accent-color:var(--pink);width:18px;height:18px}
-.ic{border:0;background:none;font-size:16px;padding:4px 7px;border-radius:8px}
-.empty{text-align:center;color:var(--mut);padding:26px 8px}
-.empty .lily{width:90px;height:90px;display:block;margin:0 auto 6px}
+.empty{text-align:center;color:var(--mut);padding:18px 8px}
 
-/* Modal, toasts, petals */
 .ov{position:fixed;inset:0;z-index:20;background:var(--ovl);backdrop-filter:blur(6px);display:none;place-items:center;padding:16px}
 .ov.show{display:grid}
-.modal{background:var(--surf);width:min(480px,100%);max-height:92vh;overflow:auto;border-radius:28px;padding:22px;box-shadow:0 30px 80px -20px #000}
+.modal{background:var(--surf);width:min(480px,100%);max-height:92vh;overflow:auto;border-radius:28px;padding:22px}
 .modal h2{font-size:30px;margin:0 0 12px;color:var(--deep)}
 .f{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .f label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut);font-weight:500}
 .f .w{grid-column:1/-1}
-.f input,.f select,.f textarea,.modal textarea{padding:10px 12px;border-radius:13px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink)}
+.f input,.f select,.f textarea,.modal textarea{padding:10px 12px;border-radius:13px;border:1.5px solid var(--line);background:var(--bg)}
 .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
 .foot .del{margin-right:auto;color:var(--deep)}
 .toasts{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:70;display:flex;flex-direction:column;gap:8px;align-items:center}
-.toast{background:var(--ink,#333);color:var(--bg,#fff);padding:10px 18px;border-radius:99px;box-shadow:var(--sh);animation:fade .4s,fade .4s 2.6s reverse forwards}
-.petal{position:fixed;z-index:80;width:18px;height:26px;pointer-events:none;border-radius:60% 60% 50% 50%/80% 80% 20% 20%;background:linear-gradient(#fff,var(--pt,#f48fb8))}
+.toast{background:#333;color:#fff;padding:10px 18px;border-radius:99px;animation:fade .4s,fade .4s 2.6s reverse forwards}
 
-/* Login */
 #login{position:fixed;inset:0;z-index:60;display:flex;background:#000}
 #login .lt{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:3;padding:8px 20px;border-radius:99px;background:rgba(20,10,30,.72);color:#fff;font:600 italic 22px "Cormorant Garamond",Georgia,serif;margin:0;white-space:nowrap;pointer-events:none}
 #lkimp{position:absolute;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:3;color:#fff;opacity:.85}
@@ -121,8 +81,7 @@ small{color:var(--mut)}
 .pane.her{background:radial-gradient(600px 420px at 50% 40%,#ffd3e5,transparent 70%),#fff0f6;color:#4a1f33;--b:#f7cfe0;--f:#fff;--a:#e8588f}
 .pane.him{background:radial-gradient(600px 420px at 50% 40%,rgba(164,92,255,.3),transparent 70%),#000;color:#f1e8ff;--b:#33205a;--f:#130c1e;--a:#a45cff}
 .pane .box{width:min(340px,100%);text-align:center;transition:opacity .4s}
-.pane .lg .lily{width:150px;height:150px;transition:transform .6s;filter:drop-shadow(0 10px 18px rgba(200,60,130,.35))}
-.pane:hover .lg .lily{transform:scale(1.1) rotate(4deg)}
+.pane .lg .lily{width:140px;height:140px;transition:transform .6s}
 .pane.open .lg .lily{transform:scale(.8)}
 .pane h2{font:700 38px/1.1 "Cormorant Garamond",Georgia,serif;margin:6px 0 2px}
 .pane.her h2{color:#b02a63}
@@ -133,9 +92,7 @@ small{color:var(--mut)}
 .pane form{display:none;gap:10px;text-align:left;margin-top:10px}
 .pane.open form{display:grid;animation:fade .6s .25s backwards}
 .pane form input:not([type=checkbox]){width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid var(--b);background:var(--f);color:inherit}
-.pane form input:focus{outline:0;border-color:var(--a)}
 .keep{display:flex;gap:8px;align-items:center;font-size:13px;opacity:.85}
-.keep input{accent-color:var(--a)}
 .err{min-height:18px;font-size:13px;color:#d6336c}
 .pane.him .err{color:#ff8fb3}
 .go{border:0;border-radius:99px;padding:12px;font-weight:600;color:#fff}
@@ -144,25 +101,20 @@ small{color:var(--mut)}
 .lnk{display:flex;justify-content:center;gap:12px}
 .lk{border:0;background:none;font-size:13px;color:inherit;opacity:.7;text-decoration:underline}
 .shake .box{animation:shake .4s}
-@keyframes shake{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
-
 @media (max-width:960px){.layout{grid-template-columns:1fr}}
-@media (max-width:640px){.cell{min-height:64px;padding:3px}.pill{font-size:0;height:7px;padding:0}.search input,.search input:focus{width:150px}}
-@media (max-width:700px){#login{flex-direction:column}.pane{padding-top:56px}.pane .lg .lily{width:100px;height:100px}.pane h2{font-size:30px}.pane.shrunk{flex:.4}.pane.open{flex:3}}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+@media (max-width:640px){.cell{min-height:60px;padding:3px}.pill{font-size:0;height:7px;padding:0}}
+@media (max-width:700px){#login{flex-direction:column}.pane{padding-top:56px}.pane .lg .lily{width:90px;height:90px}.pane h2{font-size:30px}.pane.shrunk{flex:.4}.pane.open{flex:3}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="defs"></defs></svg>
-<div class="garden" id="garden" aria-hidden="true"></div>
-
 <div class="app">
   <header class="top">
     <div class="brand"><span id="logo"></span><div><h1 id="h1"></h1><p id="tag"></p></div></div>
     <div class="actions">
       <span class="who" id="who"></span>
       <button class="btn" id="out">Log out</button>
-      <div class="search"><input id="q" type="search" placeholder="Search dates (press /)" aria-label="Search dates"></div>
       <button class="btn" id="bk">Backup</button>
       <button class="btn" id="lnkdev">Link device</button>
       <button class="btn" id="rst">Reset data</button>
@@ -174,54 +126,44 @@ small{color:var(--mut)}
       <div class="bar">
         <h2 id="title"></h2>
         <div class="nav"><button class="btn" id="prev" aria-label="Previous month">‹</button><button class="btn" id="today">Today</button><button class="btn" id="nxt" aria-label="Next month">›</button></div>
-        <div class="seg" id="seg"><button data-m="month" class="on">Month</button><button data-m="agenda">Agenda</button></div>
       </div>
       <div class="chips" id="chips"></div>
       <div id="body"></div>
     </section>
     <aside class="side">
       <div class="card next" id="next"></div>
-      <div class="card stats" id="stats"></div>
       <div class="card"><h3 class="t">Coming up</h3><div id="up"></div></div>
     </aside>
   </main>
 </div>
-
 <div class="ov" id="ov"><div class="modal" id="md" role="dialog" aria-modal="true"></div></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <div id="login" role="dialog" aria-label="Sign in"></div>
 
 <script>
-/* ---------- Themes: each person's colours, text and artwork live here ---------- */
+/* ---------- Themes ---------- */
 const CATS = { date: 'Date night', family: 'Family', work: 'Work', care: 'Self-care', other: 'Other' };
-
 const THEME = {
   her: {
     dark: 0, name: ['Lily Dates', 'Your schedule, in bloom'],
-    v: { bg: '#fff3f8', surf: '#fff', ink: '#4a1f33', mut: '#946781', pink: '#e8588f', deep: '#b02a63', blush: '#ffe4ef', line: '#f7cfe0', g1: '#ff8dbb', g2: '#d63a82', glow: '#ffe4ef', ovl: 'rgba(74,31,51,.45)', pt: '#f48fb8', dsh: 'rgba(232,88,143,.4)' },
+    v: { bg: '#fff3f8', surf: '#fff', ink: '#4a1f33', mut: '#946781', pink: '#e8588f', deep: '#b02a63', blush: '#ffe4ef', line: '#f7cfe0', g1: '#ff8dbb', g2: '#d63a82', glow: '#ffe4ef', ovl: 'rgba(74,31,51,.45)', dsh: 'rgba(232,88,143,.4)' },
     cat: { date: '#e8588f', family: '#ee8b4f', work: '#9b5de5', care: '#d63fa6', other: '#b8749a' },
     defs: '<radialGradient id="g-her" cx="50%" cy="88%" r="95%"><stop offset="0" stop-color="#fff8fb"/><stop offset=".55" stop-color="#ffc2da"/><stop offset="1" stop-color="#ee6a9f"/></radialGradient>',
-    art(c = '') {
-      let p = '', s = '';
-      for (let i = 0; i < 6; i++) {
-        p += `<path class="p" style="--r:${i * 60}deg;--i:${i}" d="M50 52C37 36 40 14 50 2C60 14 63 36 50 52Z" fill="url(#g-her)" stroke="#d6407f" stroke-opacity=".5" stroke-width=".8"/>`;
-        const a = (i * 60 + 30) * Math.PI / 180, x = 50 + Math.sin(a) * 17, y = 50 - Math.cos(a) * 17;
-        s += `<line x1="50" y1="50" x2="${x}" y2="${y}" stroke="#d6407f" stroke-width="1.2"/><ellipse cx="${x}" cy="${y}" rx="2.6" ry="4" fill="#ffc94d" transform="rotate(${i * 60 + 30} ${x} ${y})"/>`;
-      }
-      return `<svg class="lily ${c}" viewBox="0 0 100 100" aria-hidden="true">${p}<g class="st">${s}</g></svg>`;
+    art() {
+      let p = '';
+      for (let i = 0; i < 6; i++) p += `<path d="M50 52C37 36 40 14 50 2C60 14 63 36 50 52Z" fill="url(#g-her)" stroke="#d6407f" stroke-opacity=".5" stroke-width=".8" transform="rotate(${i * 60} 50 50)"/>`;
+      return `<svg class="lily" viewBox="0 0 100 100" aria-hidden="true">${p}<circle cx="50" cy="50" r="5" fill="#ffc94d"/></svg>`;
     }
   },
   him: {
     dark: 1, name: ['Midnight Lotus', 'Your schedule, in still water'],
-    v: { bg: '#000', surf: '#0b0810', ink: '#f1e8ff', mut: '#a994cc', pink: '#a45cff', deep: '#c79bff', blush: '#150e24', line: '#33205a', g1: '#b58bff', g2: '#6a22c9', glow: 'rgba(164,92,255,.22)', ovl: 'rgba(0,0,0,.65)', pt: '#d2b3ff', dsh: 'rgba(164,92,255,.45)' },
+    v: { bg: '#000', surf: '#0b0810', ink: '#f1e8ff', mut: '#a994cc', pink: '#a45cff', deep: '#c79bff', blush: '#150e24', line: '#33205a', g1: '#b58bff', g2: '#6a22c9', glow: 'rgba(164,92,255,.22)', ovl: 'rgba(0,0,0,.65)', dsh: 'rgba(164,92,255,.45)' },
     cat: { date: '#a45cff', family: '#e056c9', work: '#6f7bff', care: '#2fb8a6', other: '#8b7aa8' },
-    defs: '<linearGradient id="g-b" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#3b138a"/><stop offset="1" stop-color="#8a3fe6"/></linearGradient><linearGradient id="g-f" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#9a5cf0"/><stop offset="1" stop-color="#e3ccff"/></linearGradient>',
-    art(c = '') {
-      let p = '', k = 0;
-      const P = (f, L, W, r) => `<path class="p" style="--r:${r}deg;--i:${k++};--o:50px 84px" fill="url(#g-${f})" stroke="#e9d9ff" stroke-opacity=".6" stroke-width=".8" d="M50 84C${50 - W * 1.25} ${84 - L * .18} ${50 - W * 1.1} ${84 - L * .62} 50 ${84 - L}C${50 + W * 1.1} ${84 - L * .62} ${50 + W * 1.25} ${84 - L * .18} 50 84Z"/>`;
-      [[-60, 42], [-30, 58], [0, 74], [30, 58], [60, 42]].forEach(([r, L]) => p += P('b', L, 13, r));
-      [[-46, 38], [-16, 56], [16, 56], [46, 38]].forEach(([r, L]) => p += P('f', L, 13.5, r));
-      return `<svg class="lily ${c}" viewBox="0 0 100 100" aria-hidden="true">${p}<ellipse cx="50" cy="85" rx="9" ry="3.4" fill="#3a1370"/><g class="w" fill="none" stroke="#8d4be0" stroke-width="2" stroke-linecap="round"><path d="M12 91Q50 99 88 91" opacity=".85"/><path d="M28 96.5Q50 100 72 96.5" opacity=".35"/></g></svg>`;
+    defs: '<linearGradient id="g-b" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#3b138a"/><stop offset="1" stop-color="#9a5cf0"/></linearGradient>',
+    art() {
+      let p = '';
+      [[-60, 42], [-30, 58], [0, 74], [30, 58], [60, 42]].forEach(([r, L]) => p += `<path d="M50 84C34 ${84 - L * .18} 36 ${84 - L * .62} 50 ${84 - L}C64 ${84 - L * .62} 66 ${84 - L * .18} 50 84Z" fill="url(#g-b)" stroke="#e9d9ff" stroke-opacity=".6" stroke-width=".8" transform="rotate(${r} 50 84)"/>`);
+      return `<svg class="lily" viewBox="0 0 100 100" aria-hidden="true">${p}<path d="M12 91Q50 99 88 91" fill="none" stroke="#8d4be0" stroke-width="2" stroke-linecap="round"/></svg>`;
     }
   }
 };
@@ -237,10 +179,28 @@ const tm = t => { if (!t) return ''; let [h, m] = t.split(':'); h = +h; return `
 const nice = d => new Date(d + 'T00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 const enc = o => btoa(unescape(encodeURIComponent(JSON.stringify(o))));
 const dec = s => JSON.parse(decodeURIComponent(escape(atob(s.trim()))));
-const lily = c => THEME[role].art(c);
+const lily = () => THEME[role].art();
 const col = c => THEME[role].cat[c];
+function toast(m) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; $('#toasts').append(t); setTimeout(() => t.remove(), 3100); }
 
-/* ---------- Storage: dates in IndexedDB ---------- */
+/* ---------- Storage (localStorage with in-memory fallback) ---------- */
+const mem = {};
+const LS = {
+  g(k) { try { return localStorage.getItem(k); } catch (e) { return mem[k] || null; } },
+  s(k, v) { try { localStorage.setItem(k, v); } catch (e) { mem[k] = v; } },
+  d(k) { try { localStorage.removeItem(k); } catch (e) { delete mem[k]; } }
+};
+const SS = {
+  g(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
+  s(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { } },
+  d(k) { try { sessionStorage.removeItem(k); } catch (e) { } }
+};
+const ACC = {
+  get() { try { return JSON.parse(LS.g('ld-acc') || '{}'); } catch (e) { return {}; } },
+  set(a) { LS.s('ld-acc', JSON.stringify(a)); }
+};
+
+/* ---------- Dates in IndexedDB ---------- */
 const DB = {
   db: null,
   async open() {
@@ -265,89 +225,73 @@ const DB = {
   del(id) { return this.req('readwrite', s => s.delete(id)); }
 };
 
+/* ---------- Passcode security ---------- */
+const IT = 210000;                                  // PBKDF2 rounds
+const bytes = s => new TextEncoder().encode(s);
+const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+const rnd = n => hex(crypto.getRandomValues(new Uint8Array(n)));
+async function kdf(pw, salt, it = IT) {
+  const k = await crypto.subtle.importKey('raw', bytes(pw), 'PBKDF2', false, ['deriveBits']);
+  return hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: bytes(salt), iterations: it }, k, 256));
+}
+function recCode() {
+  const a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from(crypto.getRandomValues(new Uint8Array(12)), x => a[x % 32]).join('').match(/.{4}/g).join('-');
+}
+const normCode = c => c.toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/(.{4})(?=.)/g, '$1-');
+
+/* Failed-attempt delay: free for 3 tries, then 1s, 2s, 4s… up to 5 minutes */
+const failState = () => { try { return JSON.parse(LS.g('ld-fail')) || { n: 0, u: 0 }; } catch (e) { return { n: 0, u: 0 }; } };
+const waitMs = () => Math.max(0, failState().u - Date.now());
+function noteFail() {
+  const f = failState(); f.n++;
+  if (f.n >= 3) f.u = Date.now() + Math.min(2 ** (f.n - 3), 300) * 1000;
+  LS.s('ld-fail', JSON.stringify(f));
+}
+const tooMany = () => `Too many tries. Wait ${Math.ceil(waitMs() / 1000)}s.`;
+
 /* ---------- State ---------- */
-let events = [], mode = 'month', q = '', cat = 'all', role = null;
-let sel = ymd(new Date());
+let events = [], cat = 'all', role = null, sel = ymd(new Date());
 let view = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-const list = () => events.filter(e => (cat === 'all' || e.cat === cat) && (!q || (e.title + ' ' + e.place + ' ' + e.notes).toLowerCase().includes(q))).sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
-const monthKey = () => `${view.getFullYear()}-${pad(view.getMonth() + 1)}`;
+const list = () => events.filter(e => cat === 'all' || e.cat === cat).sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
 async function save(o) { const i = events.findIndex(x => x.id === o.id); i < 0 ? events.push(o) : events[i] = o; await DB.put(o); }
 
-/* ---------- Toasts and petals ---------- */
-function toast(m) {
-  const t = document.createElement('div');
-  t.className = 'toast'; t.textContent = m;
-  $('#toasts').append(t);
-  setTimeout(() => t.remove(), 3100);
-}
-function burst(x, y) {
-  for (let i = 0; i < 16; i++) {
-    const p = document.createElement('i'), a = Math.random() * 6.28, d = 60 + Math.random() * 120;
-    p.className = 'petal'; p.style.left = x + 'px'; p.style.top = y + 'px';
-    document.body.append(p);
-    p.animate([{ transform: 'translate(0,0) scale(.4)', opacity: 1 }, { transform: `translate(${Math.cos(a) * d}px,${Math.sin(a) * d + 110}px) rotate(${Math.random() * 540}deg)`, opacity: 0 }], { duration: 1100 + Math.random() * 700, easing: 'cubic-bezier(.2,.7,.3,1)' }).onfinish = () => p.remove();
-  }
-}
-
 /* ---------- Rendering ---------- */
-function renderCal(anim) {
+function renderCal() {
   $('#title').textContent = `${MN[view.getMonth()]} ${view.getFullYear()}`;
-  const L = list(), body = $('#body');
-  if (mode === 'month') {
-    const st = new Date(view); st.setDate(1 - view.getDay());
-    let h = '<div class="wk">' + ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `<div>${d}</div>`).join('') + `</div><div class="grid ${anim ? 'enter' : ''}">`;
-    for (let i = 0; i < 42; i++) {
-      const d = new Date(st); d.setDate(st.getDate() + i);
-      const k = ymd(d), ev = L.filter(e => e.date === k);
-      h += `<div class="cell ${d.getMonth() !== view.getMonth() ? 'out' : ''} ${k === ymd(new Date()) ? 'today' : ''} ${k === sel ? 'sel' : ''}" data-d="${k}" tabindex="0" role="button" aria-label="${k}" style="--d:${i}"><span class="n">${d.getDate()}</span>`
-        + ev.slice(0, 2).map(e => `<button class="pill ${e.done ? 'done' : ''}" data-id="${e.id}" style="--c:${col(e.cat)}" title="${esc(e.title)}">${tm(e.start).replace(' ', '').toLowerCase()} ${esc(e.title)}</button>`).join('')
-        + (ev.length > 2 ? `<span class="more">+${ev.length - 2} more</span>` : '') + '</div>';
-    }
-    body.innerHTML = h + '</div>';
-    return;
+  const L = list(), st = new Date(view); st.setDate(1 - view.getDay());
+  let h = '<div class="wk">' + ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `<div>${d}</div>`).join('') + '</div><div class="grid">';
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(st); d.setDate(st.getDate() + i);
+    const k = ymd(d), ev = L.filter(e => e.date === k);
+    h += `<div class="cell ${d.getMonth() !== view.getMonth() ? 'out' : ''} ${k === ymd(new Date()) ? 'today' : ''}" data-d="${k}" tabindex="0" role="button" aria-label="${k}"><span class="n">${d.getDate()}</span>`
+      + ev.slice(0, 2).map(e => `<button class="pill ${e.done ? 'done' : ''}" data-id="${e.id}" style="--c:${col(e.cat)}" title="${esc(e.title)}">${tm(e.start).replace(' ', '').toLowerCase()} ${esc(e.title)}</button>`).join('')
+      + (ev.length > 2 ? `<span class="more">+${ev.length - 2} more</span>` : '') + '</div>';
   }
-  const m = L.filter(e => e.date.startsWith(monthKey()));
-  if (!m.length) { body.innerHTML = `<div class="empty">${lily('bloom')}<b>No dates this month</b><br>Pick a day or press N to plan one.</div>`; return; }
-  let h = '<div class="ag">', last = '';
-  m.forEach((e, i) => {
-    if (e.date !== last) { h += `<div class="day">${nice(e.date)}</div>`; last = e.date; }
-    h += `<div class="row ${e.done ? 'done' : ''}" style="--c:${col(e.cat)};animation-delay:${i * 40}ms"><input type="checkbox" data-done="${e.id}" ${e.done ? 'checked' : ''} aria-label="Mark done"><div class="tx"><b>${esc(e.title)}</b><br><small>${tm(e.start)}${e.end ? ' – ' + tm(e.end) : ''}${e.place ? ' · ' + esc(e.place) : ''}</small></div><button class="ic" data-id="${e.id}" aria-label="Edit">✎</button><button class="ic" data-rm="${e.id}" aria-label="Delete">🗑</button></div>`;
-  });
-  body.innerHTML = h + '</div>';
+  $('#body').innerHTML = h + '</div>';
 }
-
 function renderSide() {
   const now = new Date(), nk = ymd(now) + pad(now.getHours()) + ':' + pad(now.getMinutes());
   const up = events.filter(e => !e.done && (e.date + (e.start || '00:00')) >= nk).sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
   const n = up[0];
-  let rel = '';
-  if (n) {
-    const ms = new Date(n.date + 'T' + (n.start || '00:00')) - now, m = Math.round(ms / 6e4), h = Math.round(m / 60), d = Math.round(ms / 864e5);
-    rel = m < 60 ? `in ${Math.max(m, 1)} min` : h < 24 ? `in ${h} hr` : d <= 1 ? 'tomorrow' : `in ${d} days`;
-  }
-  $('#next').innerHTML = lily() + (n ? `<small>Next up · ${rel}</small><h3>${esc(n.title)}</h3><small>${nice(n.date)} · ${tm(n.start)}${n.place ? '<br>' + esc(n.place) : ''}</small>` : '<small>Next up</small><h3>Nothing planned</h3><small>Add a date to see it here.</small>');
-  const mo = events.filter(e => e.date.startsWith(monthKey()));
-  $('#stats').innerHTML = `<div><b>${mo.length}</b><span>this month</span></div><div><b>${mo.filter(e => e.done).length}</b><span>done</span></div><div><b>${up.length}</b><span>upcoming</span></div>`;
-  $('#up').innerHTML = up.length ? up.slice(0, 5).map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><span><b>${esc(e.title)}</b><small>${nice(e.date)} · ${tm(e.start)}</small></span></button>`).join('') : `<div class="empty">${lily('bloom')}Nothing on the horizon.</div>`;
+  $('#next').innerHTML = n ? `<small>Next up</small><h3>${esc(n.title)}</h3><small>${nice(n.date)} · ${tm(n.start)}${n.place ? '<br>' + esc(n.place) : ''}</small>` : '<small>Next up</small><h3>Nothing planned</h3><small>Add a date to see it here.</small>';
+  $('#up').innerHTML = up.length ? up.slice(0, 5).map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}</b><small>${nice(e.date)} · ${tm(e.start)}</small></button>`).join('') : '<div class="empty">Nothing on the horizon.</div>';
 }
-
-function render(anim) { if (role) { renderCal(anim); renderSide(); } }
-
+const render = () => { if (role) { renderCal(); renderSide(); } };
 function buildChips() {
   $('#chips').innerHTML = '<button class="chip" data-c="all">All</button>' + Object.entries(CATS).map(([k, v]) => `<button class="chip" data-c="${k}" style="--c:${col(k)}"><i></i>${v}</button>`).join('');
   document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x.dataset.c === cat));
 }
 
-/* ---------- Modals: date form, delete, backup, link device ---------- */
+/* ---------- Modals ---------- */
 function open(h) { $('#md').innerHTML = h; $('#ov').classList.add('show'); const f = $('#md input,#md textarea'); f && f.focus(); }
 function close() { $('#ov').classList.remove('show'); }
-
 function form(id, date) {
   const e = events.find(x => x.id === id) || { date: date || sel, start: '18:00', end: '20:00', cat: 'date', title: '', place: '', notes: '' };
   open(`<h2>${id ? 'Edit date' : 'New date'}</h2><form id="f" class="f"><label class="w">Title<input name="title" required maxlength="80" value="${esc(e.title)}" placeholder="Dinner under the lanterns"></label>
 <label>Date<input type="date" name="date" required value="${e.date}"></label><label>Category<select name="cat">${Object.entries(CATS).map(([k, v]) => `<option value="${k}" ${k === e.cat ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
 <label>Starts<input type="time" name="start" value="${e.start || ''}"></label><label>Ends<input type="time" name="end" value="${e.end || ''}"></label>
-<label class="w">Place<input name="place" maxlength="80" value="${esc(e.place)}" placeholder="Where?"></label><label class="w">Notes<textarea name="notes" rows="3" placeholder="Outfit, gift ideas, reminders…">${esc(e.notes)}</textarea></label>
+<label class="w">Place<input name="place" maxlength="80" value="${esc(e.place)}"></label><label class="w">Notes<textarea name="notes" rows="3">${esc(e.notes)}</textarea></label>
 <div class="foot w">${id ? '<button type="button" class="btn del" id="rm">Delete date</button>' : ''}<button type="button" class="btn" id="cx">Cancel</button><button class="btn pri">Save date</button></div></form>`);
   $('#cx').onclick = close;
   if (id) $('#rm').onclick = () => remove(id);
@@ -359,21 +303,13 @@ function form(id, date) {
     if (o.start && o.end && o.end <= o.start) return toast('End time must be after the start time');
     const clash = events.find(x => x.id !== o.id && x.date === o.date && x.start && o.start && x.end && o.end && x.start < o.end && o.start < x.end);
     await save(o);
-    sel = o.date;
-    const r = ev.submitter.getBoundingClientRect();
-    burst(r.left + r.width / 2, r.top);
-    close();
+    sel = o.date; close();
     view = new Date(o.date.slice(0, 4), +o.date.slice(5, 7) - 1, 1);
-    render(true);
+    render();
     toast(clash ? `Saved, but it overlaps “${clash.title}”` : DB.db ? 'Date saved' : 'Saved for this visit only');
   };
 }
-
-async function remove(id) {
-  events = events.filter(x => x.id !== id);
-  await DB.del(id);
-  close(); render(); toast('Date deleted');
-}
+async function remove(id) { events = events.filter(x => x.id !== id); await DB.del(id); close(); render(); toast('Date deleted'); }
 
 function box(title, intro, text, readonly, onImport) {
   open(`<h2>${title}</h2><p style="color:var(--mut);margin:0 0 8px">${intro}</p><textarea id="js" rows="8" style="width:100%"${readonly ? ' readonly' : ''}>${esc(text)}</textarea><div class="foot"><button class="btn" id="cx">Close</button><button class="btn ${onImport ? '' : 'pri'}" id="cp">Copy</button>${onImport ? '<button class="btn pri" id="im">Import</button>' : ''}</div>`);
@@ -382,121 +318,76 @@ function box(title, intro, text, readonly, onImport) {
   if (onImport) $('#im').onclick = onImport;
 }
 
+/* Re-check the signed-in person's passcode before risky actions */
+async function confirmPass(msg) {
+  if (waitMs()) { alert(tooMany()); return false; }
+  const pw = prompt(msg);
+  if (pw === null) return false;
+  const a = ACC.get()[role];
+  if (await kdf(pw, a.salt, a.it) !== a.h) { noteFail(); alert('That passcode is incorrect.'); return false; }
+  LS.d('ld-fail'); return true;
+}
+
 $('#bk').onclick = () => box('Backup', 'Copy this text to keep a backup, or paste a saved backup here and import it.', JSON.stringify(events), false, async () => {
   try {
     const a = JSON.parse($('#js').value);
     if (!Array.isArray(a)) throw 0;
     for (const o of a) if (o && o.id && o.title && o.date && CATS[o.cat]) await save(o);
-    close(); render(true); toast('Backup imported');
+    close(); render(); toast('Backup imported');
   } catch (e) { toast('That text isn’t a valid backup'); }
 });
 
-$('#lnkdev').onclick = () => {
-  const all = ACC.get();
-  box('Link device', 'Copy this code, then on your other device choose “Already have an account?” on the login screen and paste it. Keep it private.', enc({ acc: { [role]: all[role] }, events }), true);
+$('#lnkdev').onclick = async () => {
+  if (!await confirmPass('Enter your passcode to create a link code:')) return;
+  box('Link device', 'Copy this code, then on your other device choose “Already have an account on another device?” and paste it. Treat it like a password, and don’t share it.', enc({ acc: { [role]: ACC.get()[role] }, events }), true);
 };
 
 $('#rst').onclick = async () => {
+  if (!await confirmPass('Enter your passcode to delete ALL dates on this device:')) return;
   if (!confirm('Delete ALL dates on this device? This cannot be undone.')) return;
-  const withAcc = confirm('Also delete the saved accounts and passcodes on this device?\n\nOK = delete accounts too\nCancel = keep the accounts');
   for (const o of events.slice()) await DB.del(o.id);
-  events = [];
-  if (withAcc) {
-    try { ['ld-acc', 'ld-keep', 'ld-active'].forEach(k => localStorage.removeItem(k)); sessionStorage.removeItem('ld-role'); } catch (e) { }
-    window._acc = {};
-    location.reload();
-    return;
-  }
-  render(true); toast('All dates deleted');
+  events = []; render(); toast('All dates deleted');
 };
 
 /* ---------- App events ---------- */
 document.addEventListener('click', e => {
   if (!role) return;
-  const t = e.target, pill = t.closest('[data-id]'), cell = t.closest('.cell'), rm = t.closest('[data-rm]'), c = t.closest('.chip'), m = t.closest('#seg button');
-  if (rm) return remove(rm.dataset.rm);
+  const t = e.target, pill = t.closest('[data-id]'), cell = t.closest('.cell'), c = t.closest('.chip');
   if (pill) return form(pill.dataset.id);
-  if (cell) {
-    sel = cell.dataset.d;
-    const o = new Date(sel + 'T00:00');
-    if (o.getMonth() !== view.getMonth()) { view = new Date(o.getFullYear(), o.getMonth(), 1); render(true); } else renderCal();
-    return form(null, sel);
-  }
+  if (cell) { sel = cell.dataset.d; return form(null, sel); }
   if (c) { cat = c.dataset.c; document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c)); render(); }
-  if (m) { mode = m.dataset.m; document.querySelectorAll('#seg button').forEach(x => x.classList.toggle('on', x === m)); renderCal(true); }
   if (t === $('#ov')) close();
 });
-
-document.addEventListener('change', async e => {
-  const o = role && events.find(x => x.id === e.target.dataset.done);
-  if (!o) return;
-  o.done = e.target.checked;
-  await DB.put(o);
-  if (o.done) { const r = e.target.getBoundingClientRect(); burst(r.left, r.top); toast('Marked as done'); }
-  render();
-});
-
-const go = n => { view = new Date(view.getFullYear(), view.getMonth() + n, 1); render(true); };
-$('#prev').onclick = () => go(-1);
-$('#nxt').onclick = () => go(1);
-$('#today').onclick = () => { const n = new Date(); view = new Date(n.getFullYear(), n.getMonth(), 1); sel = ymd(n); render(true); };
-$('#new').onclick = () => form(null, sel);
-$('#q').oninput = e => { q = e.target.value.trim().toLowerCase(); render(); };
-
 document.addEventListener('keydown', e => {
   if (!role) return;
-  if (e.key === 'Escape') return close();
-  if (e.key === 'Enter' && e.target.classList.contains('cell')) return e.target.click();
-  if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || $('#ov').classList.contains('show')) return;
-  if (e.key === 'n') { e.preventDefault(); form(null, sel); }
-  else if (e.key === 't') $('#today').click();
-  else if (e.key === '/') { e.preventDefault(); $('#q').focus(); }
-  else if (e.key === 'ArrowLeft') go(-1);
-  else if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'Escape') close();
+  if (e.key === 'Enter' && e.target.classList.contains('cell')) e.target.click();
 });
-
-/* ---------- Apply the signed-in person's theme ---------- */
-const GARDEN = () => [[8, 12, 150, 16, '18s', 25], [78, 6, 200, -10, '22s', -30], [88, 62, 130, 30, '16s', 40], [2, 70, 180, -20, '20s', -25], [46, 84, 110, 10, '14s', 35]]
-  .map(([x, y, s, r, t, d]) => lily('').replace('<svg class="lily "', `<svg class="lily" style="left:${x}%;top:${y}%;width:${s}px;transform:rotate(${r}deg);--t:${t};--rot:${d}deg"`)).join('');
+const go = n => { view = new Date(view.getFullYear(), view.getMonth() + n, 1); render(); };
+$('#prev').onclick = () => go(-1);
+$('#nxt').onclick = () => go(1);
+$('#today').onclick = () => { const n = new Date(); view = new Date(n.getFullYear(), n.getMonth(), 1); sel = ymd(n); render(); };
+$('#new').onclick = () => form(null, sel);
 
 function applyTheme(r) {
   const T = THEME[r], st = document.documentElement.style;
   for (const k in T.v) st.setProperty('--' + k, T.v[k]);
   st.colorScheme = T.dark ? 'dark' : 'light';
-  $('#logo').innerHTML = lily('bloom');
-  $('#garden').innerHTML = GARDEN();
+  $('#logo').innerHTML = lily();
   $('#h1').textContent = T.name[0];
   $('#tag').textContent = T.name[1];
-  buildChips();
-  render(true);
+  buildChips(); render();
 }
 
-/* ---------- Login (accounts stay on this device) ---------- */
-const ACC = {
-  get() { try { return JSON.parse(localStorage.getItem('ld-acc') || '{}'); } catch (e) { return window._acc || {}; } },
-  set(a) { window._acc = a; try { localStorage.setItem('ld-acc', JSON.stringify(a)); } catch (e) { } }
-};
-
-async function hash(pw, salt) {
-  const d = salt + ':' + pw;
-  if (window.crypto && crypto.subtle) {
-    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(d));
-    return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
-  }
-  let h = 5381;
-  for (const c of d) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0;
-  return 'x' + h;
-}
-
+/* ---------- Login ---------- */
 function buildLogin() {
   const acc = ACC.get();
   $('#login').innerHTML = '<h1 class="lt">Who’s signing in?</h1><button type="button" class="lk" id="lkimp">Already have an account on another device?</button>' + ['her', 'him'].map(r => {
     const a = acc[r], g = r === 'her';
-    return `<section class="pane ${r}" data-r="${r}"><div class="box"><div class="lg">${THEME[r].art('bloom')}</div><h2>${g ? 'Girlfriend' : 'Boyfriend'}</h2><p class="sub">${a ? 'Welcome back, ' + esc(a.name) : g ? 'Step into the lily garden' : 'Step into the midnight lotus'}</p>
-<form data-r="${r}" autocomplete="off">${a ? '' : '<input name="name" placeholder="Your name" maxlength="24" required>'}<input name="pw" type="password" placeholder="${a ? 'Passcode' : 'Create a passcode (4+ characters)'}" minlength="4" required autocomplete="${a ? 'current-password' : 'new-password'}"><label class="keep"><input type="checkbox" name="keep"> Keep me signed in on this device</label><div class="err" role="alert"></div><button class="go">${a ? 'Enter' : 'Create and enter'}</button><div class="lnk">${a ? '<button type="button" class="lk" data-reset>Forgot passcode?</button>' : ''}<button type="button" class="lk" data-back>Back</button></div></form><p class="tap">Tap to sign in</p></div></section>`;
+    return `<section class="pane ${r}" data-r="${r}"><div class="box"><div class="lg">${THEME[r].art()}</div><h2>${g ? 'Girlfriend' : 'Boyfriend'}</h2><p class="sub">${a ? 'Welcome back, ' + esc(a.name) : g ? 'Step into the lily garden' : 'Step into the midnight lotus'}</p>
+<form data-r="${r}" autocomplete="off">${a ? '' : '<input name="name" placeholder="Your name" maxlength="24" required>'}<input name="pw" type="password" placeholder="${a ? 'Passcode' : 'Create a passcode (6+ characters)'}" minlength="${a ? 1 : 6}" required autocomplete="${a ? 'current-password' : 'new-password'}"><label class="keep"><input type="checkbox" name="keep"> Keep me signed in for 14 days on this device</label><div class="err" role="alert"></div><button class="go">${a ? 'Enter' : 'Create and enter'}</button><div class="lnk">${a ? '<button type="button" class="lk" data-reset>Forgot passcode?</button>' : ''}<button type="button" class="lk" data-back>Back</button></div></form><p class="tap">Tap to sign in</p></div></section>`;
   }).join('');
 }
-
 function pick(p) {
   document.querySelectorAll('#login .pane').forEach(x => { x.classList.toggle('open', x === p); x.classList.toggle('shrunk', !!p && x !== p); });
   const i = p && p.querySelector('input');
@@ -507,86 +398,90 @@ async function importDevice() {
   const s = prompt('Paste the code from your other device:');
   if (!s) return;
   try {
-    const d = dec(s);
+    const d = dec(s), have = ACC.get();
     if (!d || typeof d.acc !== 'object') throw 0;
-    ACC.set({ ...ACC.get(), ...d.acc });
+    for (const r of Object.keys(d.acc)) {
+      const a = d.acc[r];
+      if (!THEME[r] || !a || !a.salt || !a.h || !a.it || !a.rs || !a.rh) throw 0;
+      if (have[r] && !confirm(`This device already has a ${r === 'her' ? 'girlfriend' : 'boyfriend'} account. Replace it with the imported one?`)) return;
+      have[r] = a;
+    }
+    ACC.set(have);
     for (const o of (d.events || [])) if (o && o.id && o.title && o.date && CATS[o.cat]) await DB.put(o);
-    buildLogin();
-    toast('Accounts imported. You can sign in now.');
+    buildLogin(); toast('Account imported. You can sign in now.');
   } catch (e) { alert('That code isn’t valid.'); }
 }
 
-$('#login').addEventListener('click', async e => {
+/* Forgot passcode: needs this account's recovery code (never deletes the account) */
+async function forgot(r) {
+  const a = ACC.get(), x = a[r];
+  if (!x.rs) return alert('This account has no recovery code. Ask your partner to re-create it from a fresh device, or clear this site’s data.');
+  if (waitMs()) return alert(tooMany());
+  const c = prompt('Enter the recovery code you saved when you created this account:');
+  if (!c) return;
+  if (await kdf(normCode(c), x.rs, x.it) !== x.rh) { noteFail(); return alert('That recovery code is incorrect.'); }
+  const pw = prompt('New passcode (6+ characters):');
+  if (!pw || pw.length < 6) return alert('Cancelled: the passcode must be at least 6 characters.');
+  x.salt = rnd(16); x.h = await kdf(pw, x.salt, x.it); ACC.set(a); LS.d('ld-fail');
+  alert('Passcode changed. Sign in with the new one.');
+}
+
+$('#login').addEventListener('click', e => {
   if (e.target.closest('#lkimp')) return importDevice();
   const p = e.target.closest('.pane');
   if (!p) return;
   if (e.target.closest('[data-back]')) return pick(null);
-  if (e.target.closest('[data-reset]')) {
-    const r = p.dataset.r, other = r === 'her' ? 'him' : 'her', a = ACC.get();
-    if (a[other]) {   // resetting needs the partner's passcode, so nobody can take over the other side
-      const pw = prompt(`To reset this passcode, enter the ${other === 'her' ? 'girlfriend' : 'boyfriend'}'s passcode:`);
-      if (pw === null) return;
-      if (await hash(pw, a[other].salt) !== a[other].h) return alert('That passcode is incorrect, so the reset was cancelled.');
-    }
-    delete a[r]; ACC.set(a); buildLogin();
-    return pick(document.querySelector('#login .pane.' + r));
-  }
+  if (e.target.closest('[data-reset]')) return forgot(p.dataset.r);
   if (!p.classList.contains('open')) pick(p);
 });
 
 $('#login').addEventListener('submit', async e => {
   e.preventDefault();
-  const f = e.target, r = f.dataset.r, acc = ACC.get(), el = f.elements, pane = f.closest('.pane');
+  const f = e.target, r = f.dataset.r, acc = ACC.get(), el = f.elements, err = f.querySelector('.err'), pane = f.closest('.pane');
+  if (!(window.crypto && crypto.subtle)) { err.textContent = 'This browser can’t secure passcodes here. Open the page over HTTPS.'; return; }
+  if (waitMs()) { err.textContent = tooMany(); return; }
+  err.textContent = '';
   if (!acc[r]) {
-    const salt = Math.random().toString(36).slice(2);
-    acc[r] = { name: (el.name.value || '').trim() || (r === 'her' ? 'Her' : 'Him'), salt, h: await hash(el.pw.value, salt) };
+    if (el.pw.value.length < 6) { err.textContent = 'Use at least 6 characters.'; return; }
+    const salt = rnd(16), rs = rnd(16), rc = recCode();
+    acc[r] = { name: (el.name.value || '').trim() || (r === 'her' ? 'Her' : 'Him'), salt, it: IT, h: await kdf(el.pw.value, salt), rs, rh: await kdf(rc, rs) };
     ACC.set(acc);
-  } else if (await hash(el.pw.value, acc[r].salt) !== acc[r].h) {
-    f.querySelector('.err').textContent = 'That passcode doesn’t match. Try again.';
+    alert(`Your recovery code. Write it down now, it is shown only once:\n\n${rc}\n\nYou need it if you forget your passcode.`);
+  } else if (await kdf(el.pw.value, acc[r].salt, acc[r].it) !== acc[r].h) {
+    noteFail();
+    err.textContent = waitMs() ? tooMany() : 'That passcode doesn’t match. Try again.';
     pane.classList.remove('shake'); void pane.offsetWidth; pane.classList.add('shake');
     el.pw.select();
     return;
   }
+  LS.d('ld-fail');
   signIn(r, el.keep.checked);
 });
 
-/* Signing in removes the other person's whole interface from the page */
+/* Signing in removes the other person's interface from the page (cosmetic: a reload restores it on the login screen) */
 async function signIn(r, keep) {
   const a = ACC.get()[r];
   if (!a) return;
   role = r;
-  try {
-    localStorage.setItem('ld-active', r);
-    sessionStorage.setItem('ld-role', r);
-    keep ? localStorage.setItem('ld-keep', r) : localStorage.removeItem('ld-keep');
-  } catch (e) { }
+  LS.s('ld-active', r + ':' + Date.now());
+  SS.s('ld-role', r);
+  keep ? LS.s('ld-keep', JSON.stringify({ r, exp: Date.now() + 14 * 864e5 })) : LS.d('ld-keep');
   events = await DB.all();
-  $('#login').innerHTML = '';                       // both login panes gone
-  delete THEME[r === 'her' ? 'him' : 'her'];        // other theme, colours, text and artwork gone
+  $('#login').innerHTML = '';
+  delete THEME[r === 'her' ? 'him' : 'her'];
   $('#defs').innerHTML = THEME[r].defs;
   document.documentElement.classList.add('in');
   $('#who').textContent = 'Hi, ' + a.name;
   applyTheme(r);
-  burst(innerWidth / 2, innerHeight / 3);
   toast('Welcome, ' + a.name);
 }
-
-/* A reload brings both interfaces back, but only on the login screen */
-function wipeUI() {
-  try { sessionStorage.removeItem('ld-role'); } catch (e) { }
-  document.documentElement.classList.remove('in');
-  location.reload();
-}
-
-$('#out').onclick = () => {
-  try { localStorage.removeItem('ld-keep'); localStorage.removeItem('ld-active'); } catch (e) { }
-  wipeUI();
-};
+function wipeUI() { SS.d('ld-role'); document.documentElement.classList.remove('in'); location.reload(); }
+$('#out').onclick = () => { LS.d('ld-keep'); LS.d('ld-active'); wipeUI(); };
 
 /* If the other person signs in on another tab of this device, this tab signs out */
 window.addEventListener('storage', e => {
-  if (e.key === 'ld-active' && role && e.newValue && e.newValue !== role) {
-    try { sessionStorage.setItem('ld-msg', 'Signed out: the other account signed in on this device'); } catch (x) { }
+  if (e.key === 'ld-active' && role && e.newValue && e.newValue.split(':')[0] !== role) {
+    SS.s('ld-msg', 'Signed out: the other account signed in on this device');
     wipeUI();
   }
 });
@@ -595,10 +490,13 @@ window.addEventListener('storage', e => {
 (async () => {
   await DB.open();
   if (!DB.db) toast('Storage is unavailable, so dates last only for this visit');
-  let r = null, keep = false;
-  try { r = sessionStorage.getItem('ld-role') || localStorage.getItem('ld-keep'); keep = !!localStorage.getItem('ld-keep'); } catch (e) { }
+  let r = SS.g('ld-role'), keep = false;
+  try {
+    const k = JSON.parse(LS.g('ld-keep') || 'null');
+    if (k && k.exp > Date.now()) { keep = true; r = r || k.r; } else if (k) LS.d('ld-keep');
+  } catch (e) { LS.d('ld-keep'); }
   if (r && ACC.get()[r]) await signIn(r, keep); else buildLogin();
-  try { const m = sessionStorage.getItem('ld-msg'); if (m) { sessionStorage.removeItem('ld-msg'); toast(m); } } catch (e) { }
+  const m = SS.g('ld-msg'); if (m) { SS.d('ld-msg'); toast(m); }
 })();
 </script>
 </body>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
 <title>Lily &amp; Lotus Dates</title>
 <meta name="description" content="A private shared calendar for two.">
 <meta name="mobile-web-app-capable" content="yes">
@@ -326,6 +326,26 @@ button:disabled{opacity:.55;cursor:not-allowed}
   .pane{overflow-y:auto;align-content:safe center}
   #lkimp{font-size:13px;white-space:nowrap}
   .modal{touch-action:pan-y}
+}
+
+/* ===== Fit to screen: nothing may be wider than the viewport ===== */
+.layout>*,.side>*,.card{min-width:0}
+.f{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.f input,.f select,.f textarea{min-width:0;max-width:100%;width:100%}
+input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;display:block;min-height:46px}
+.item b,.item small,.toast,.brand p{overflow-wrap:anywhere}
+@media (max-width:960px){.layout{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:700px){
+  .f{grid-template-columns:minmax(0,1fr)}
+  .app{padding-left:12px;padding-right:12px}
+  .top{margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px}
+  .brand{gap:10px}
+  h1{font-size:clamp(26px,8vw,34px)}
+  .brand p{font-size:16px}
+  .bar h2{font-size:clamp(24px,7.5vw,30px)}
+  .card{padding:12px}
+  #lkimp{white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 28px)}
+  #login .lt{font-size:19px;padding:7px 18px}
 }
 </style>
 </head>

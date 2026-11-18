@@ -347,6 +347,9 @@ input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;displa
   #lkimp{white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 28px)}
   #login .lt{font-size:19px;padding:7px 18px}
 }
+
+.pane:focus-visible{outline-offset:-6px}
+@media (max-width:700px){body::after{display:none}}
 </style>
 </head>
 <body>
@@ -390,6 +393,16 @@ const CATS = { date: 'Date', school: 'School Works', other: 'Others' };
 /* Older saved dates used removed categories: map them to the new ones */
 const LEGACY = { family: 'other', work: 'school', care: 'other' };
 function fixCat(o) { if (o && !CATS[o.cat] && LEGACY[o.cat]) { o.cat = LEGACY[o.cat]; return true; } return false; }
+/* Normalise any date record (from storage, a backup or a link code) so odd or hostile data can't break or inject into the page */
+function clean(o) {
+  if (!o || typeof o !== 'object') return null;
+  fixCat(o);
+  const s = (v, n) => String(v == null ? '' : v).slice(0, n);
+  const id = s(o.id, 40).replace(/[^\w-]/g, ''), date = s(o.date, 10), title = s(o.title, 80).trim();
+  if (!id || !title || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !CATS[o.cat]) return null;
+  const t = v => /^\d{2}:\d{2}$/.test(v) ? v : '';
+  return { id, date, title, cat: o.cat, start: t(o.start), end: t(o.end), place: s(o.place, 80), notes: s(o.notes, 2000), done: o.done === true };
+}
 const THEME = {
   her: {
     dark: 0, name: ['Lily Dates', 'Your schedule, in bloom'],
@@ -447,6 +460,7 @@ const MN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'Aug
 const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const tm = t => { if (!t) return ''; let [h, m] = t.split(':'); h = +h; return `${h % 12 || 12}:${m} ${h < 12 ? 'AM' : 'PM'}`; };
 const nice = d => new Date(d + 'T00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+const when = e => nice(e.date) + (e.start ? ' · ' + tm(e.start) : '');
 const enc = o => btoa(unescape(encodeURIComponent(JSON.stringify(o))));
 const dec = s => JSON.parse(decodeURIComponent(escape(atob(s.trim()))));
 const lily = () => THEME[role].art();
@@ -573,10 +587,11 @@ function renderCal() {
   $('#title').textContent = `${MN[view.getMonth()]} ${view.getFullYear()}`;
   $('#body').classList.toggle('anim', animNext); $('#up').classList.toggle('anim', animNext); animNext = false;
   const L = list(), st = new Date(view); st.setDate(1 - view.getDay());
+  const by = {}; L.forEach(e => (by[e.date] = by[e.date] || []).push(e));
   let h = '<div class="wk">' + ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `<div>${d}</div>`).join('') + '</div><div class="grid">';
   for (let i = 0; i < 42; i++) {
     const d = new Date(st); d.setDate(st.getDate() + i);
-    const k = ymd(d), ev = L.filter(e => e.date === k);
+    const k = ymd(d), ev = by[k] || [];
     h += `<div class="cell ${d.getMonth() !== view.getMonth() ? 'out' : ''} ${k === ymd(new Date()) ? 'today' : ''} ${k === sel ? 'sel' : ''}" data-d="${k}" tabindex="0" role="button" aria-label="${nice(k)}"><span class="n">${d.getDate()}</span>`
       + ev.slice(0, 2).map(e => `<button class="pill ${e.done ? 'done' : ''}" data-id="${e.id}" style="--c:${col(e.cat)}" title="${esc(e.title)}">${tm(e.start).replace(' ', '').toLowerCase()} ${esc(e.title)}</button>`).join('')
       + (ev.length > 2 ? `<span class="more">+${ev.length - 2} more</span>` : '') + '</div>';
@@ -585,15 +600,15 @@ function renderCal() {
 }
 function renderSide() {
   const now = new Date(), nk = ymd(now) + pad(now.getHours()) + ':' + pad(now.getMinutes());
-  const up = events.filter(e => !e.done && (e.date + (e.start || '00:00')) >= nk).sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
+  const up = events.filter(e => !e.done && (e.date + (e.start || '23:59')) >= nk).sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
   const n = up[0];
-  $('#next').innerHTML = n ? `<small>Next up</small><h3>${esc(n.title)}</h3><small>${nice(n.date)} · ${tm(n.start)}${n.place ? '<br>' + esc(n.place) : ''}</small>` : '<small>Next up</small><h3>Nothing planned</h3><small>Add a date to see it here.</small>';
-  $('#up').innerHTML = up.length ? up.slice(0, 5).map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}</b><small>${nice(e.date)} · ${tm(e.start)}</small></button>`).join('') : '<div class="empty">Nothing on the horizon.</div>';
+  $('#next').innerHTML = n ? `<small>Next up</small><h3>${esc(n.title)}</h3><small>${when(n)}${n.place ? '<br>' + esc(n.place) : ''}</small>` : '<small>Next up</small><h3>Nothing planned</h3><small>Add a date to see it here.</small>';
+  $('#up').innerHTML = up.length ? up.slice(0, 5).map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}</b><small>${when(e)}</small></button>`).join('') : '<div class="empty">Nothing on the horizon.</div>';
 }
 function renderDay() {
   const L = list().filter(e => e.date === sel);
   $('#day').innerHTML = `<div class="dayhead"><h3 class="t">${nice(sel)}</h3><button class="btn pri" id="dayadd">+ Add</button></div>`
-    + (L.length ? L.map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}</b><small>${tm(e.start)}${e.end ? ' – ' + tm(e.end) : ''}${e.place ? ' · ' + esc(e.place) : ''}</small></button>`).join('') : '<div class="empty">Nothing planned for this day.</div>');
+    + (L.length ? L.map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}</b><small>${e.start ? tm(e.start) + (e.end ? ' – ' + tm(e.end) : '') : 'All day'}${e.place ? ' · ' + esc(e.place) : ''}</small></button>`).join('') : '<div class="empty">Nothing planned for this day.</div>');
 }
 const render = () => { if (role) { renderCal(); renderSide(); renderDay(); } };
 function buildChips() {
@@ -648,7 +663,7 @@ async function remove(id) {
 function box(title, intro, text, readonly, onImport) {
   open(`<h2>${title}</h2><p style="color:var(--mut);margin:0 0 8px">${intro}</p><textarea id="js" rows="8" style="width:100%"${readonly ? ' readonly' : ''}>${esc(text)}</textarea><div class="foot"><button class="btn" id="cx">Close</button><button class="btn ${onImport ? '' : 'pri'}" id="cp">Copy</button>${onImport ? '<button class="btn pri" id="im">Import</button>' : ''}</div>`);
   $('#cx').onclick = close;
-  $('#cp').onclick = () => { const t = $('#js'); t.select(); try { navigator.clipboard.writeText(t.value); } catch (e) { document.execCommand('copy'); } toast('Copied'); };
+  $('#cp').onclick = () => { const t = $('#js'); t.select(); const done = () => toast('Copied'), old = () => { try { document.execCommand('copy'); done(); } catch (e) { toast('Press and hold the text to copy it'); } }; navigator.clipboard ? navigator.clipboard.writeText(t.value).then(done, old) : old(); };
   if (onImport) $('#im').onclick = onImport;
 }
 
@@ -669,7 +684,7 @@ $('#bk').onclick = () => box('Backup', 'Copy this text to keep a backup, or past
   try {
     const a = JSON.parse($('#js').value);
     if (!Array.isArray(a)) throw 0;
-    for (const o of a) { fixCat(o); if (o && o.id && o.title && o.date && CATS[o.cat]) await save(o); }
+    for (const o of a) { const c = clean(o); if (c) await save(c); }
     close(); render(); toast('Backup imported');
   } catch (e) { toast('That text isn’t a valid backup'); }
 });
@@ -700,12 +715,10 @@ document.addEventListener('click', e => {
     return form(null, sel);
   }
   if (c) { cat = c.dataset.c; document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c)); render(); }
-  if (t === $('#ov')) close();
 });
 document.addEventListener('keydown', e => {
   if (!role) return;
-  if (e.key === 'Escape') close();
-  if (e.key === 'Enter' && e.target.classList.contains('cell')) e.target.click();
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('cell')) { e.preventDefault(); e.target.click(); }
 });
 const go = n => { view = new Date(view.getFullYear(), view.getMonth() + n, 1); animNext = true; render(); };
 $('#prev').onclick = () => go(-1);
@@ -728,13 +741,13 @@ function buildLogin() {
   const acc = ACC.get();
   $('#login').innerHTML = '<h1 class="lt">Who’s signing in?</h1><button type="button" class="lk" id="lkimp">Already have an account on another device?</button>' + ['her', 'him'].map(r => {
     const a = acc[r], g = r === 'her';
-    return `<section class="pane ${r}" data-r="${r}"><div class="box"><div class="lg">${THEME[r].art()}</div><h2>${g ? 'Girlfriend' : 'Boyfriend'}</h2><p class="sub">${a ? 'Welcome back, ' + esc(a.name) : g ? 'Step into the lily garden' : 'Step into the midnight lotus'}</p>
+    return `<section class="pane ${r}" data-r="${r}" tabindex="0"><div class="box"><div class="lg">${THEME[r].art()}</div><h2>${g ? 'Girlfriend' : 'Boyfriend'}</h2><p class="sub">${a ? 'Welcome back, ' + esc(a.name) : g ? 'Step into the lily garden' : 'Step into the midnight lotus'}</p>
 <form data-r="${r}" autocomplete="off">${a ? '' : '<input name="name" placeholder="Your name" maxlength="24" required>'}<span class="pw"><input name="pw" type="password" placeholder="${a ? 'Passcode' : 'Create a passcode (6+ characters)'}" minlength="${a ? 1 : 6}" required autocomplete="${a ? 'current-password' : 'new-password'}">${EYE}</span><label class="keep"><input type="checkbox" name="keep"> Keep me signed in for 14 days on this device</label><div class="err" role="alert"></div><button class="go">${a ? 'Enter' : 'Create and enter'}</button><div class="lnk">${a ? '<button type="button" class="lk" data-reset>Forgot passcode?</button>' : ''}<button type="button" class="lk" data-back>Back</button></div></form><p class="tap">Tap to sign in</p></div></section>`;
   }).join('');
 }
 function pick(p) {
   hideEyes();
-  document.querySelectorAll('#login .pane').forEach(x => { x.classList.toggle('open', x === p); x.classList.toggle('shrunk', !!p && x !== p); });
+  document.querySelectorAll('#login .pane').forEach(x => { x.classList.toggle('open', x === p); x.classList.toggle('shrunk', !!p && x !== p); x.tabIndex = x === p ? -1 : 0; });
   const i = p && p.querySelector('input');
   i && setTimeout(() => i.focus(), 500);
 }
@@ -747,12 +760,14 @@ async function importDevice() {
     if (!d || typeof d.acc !== 'object') throw 0;
     for (const r of Object.keys(d.acc)) {
       const a = d.acc[r];
-      if (!THEME[r] || !a || !a.salt || !a.h || !a.it || !a.rs || !a.rh) throw 0;
+      const hx = v => typeof v === 'string' && /^[0-9a-f]{16,128}$/.test(v);
+      if (!THEME[r] || !a || !hx(a.salt) || !hx(a.h) || !hx(a.rs) || !hx(a.rh) || !Number.isInteger(a.it) || a.it < 1e5 || a.it > 1e6) throw 0;
+      a.name = String(a.name || '').slice(0, 24);
       if (have[r] && !confirm(`This device already has a ${r === 'her' ? 'girlfriend' : 'boyfriend'} account. Replace it with the imported one?`)) return;
       have[r] = a;
     }
     ACC.set(have);
-    for (const o of (d.events || [])) { fixCat(o); if (o && o.id && o.title && o.date && CATS[o.cat]) await DB.put(o); }
+    for (const o of (Array.isArray(d.events) ? d.events : [])) { const c = clean(o); if (c) await DB.put(c); }
     buildLogin(); toast('Account imported. You can sign in now.');
   } catch (e) { alert('That code isn’t valid.'); }
 }
@@ -784,6 +799,10 @@ $('#login').addEventListener('click', e => {
   if (!p.classList.contains('open')) pick(p);
 });
 
+$('#login').addEventListener('keydown', e => {
+  const p = e.target;
+  if (p.classList && p.classList.contains('pane') && (e.key === 'Enter' || e.key === ' ') && !p.classList.contains('open')) { e.preventDefault(); pick(p); }
+});
 $('#login').addEventListener('submit', async e => {
   e.preventDefault();
   const f = e.target, r = f.dataset.r, acc = ACC.get(), el = f.elements, err = f.querySelector('.err'), pane = f.closest('.pane');
@@ -815,8 +834,7 @@ async function signIn(r, keep) {
   LS.s('ld-active', r + ':' + Date.now());
   SS.s('ld-role', r);
   keep ? LS.s('ld-keep', JSON.stringify({ r, exp: Date.now() + 14 * 864e5 })) : LS.d('ld-keep');
-  events = await DB.all();
-  for (const o of events) if (fixCat(o)) await DB.put(o);
+  events = (await DB.all()).map(clean).filter(Boolean);
   $('#login').innerHTML = '';
   delete THEME[r === 'her' ? 'him' : 'her'];
   $('#defs').innerHTML = THEME[r].defs;
@@ -957,7 +975,16 @@ function editProfile() {
 $('#prof').onclick = editProfile;
 
 $('#lhelp').onclick = showHelp;
-document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); if (!role && e.target === $('#ov')) close(); });
+document.addEventListener('keydown', e => {
+  if (!$('#ov').classList.contains('show')) return;
+  if (e.key === 'Escape') return close();
+  if (e.key !== 'Tab') return;
+  const md = $('#md'), f = [...md.querySelectorAll('button,input,select,textarea,summary')].filter(x => !x.disabled && x.offsetParent !== null);
+  if (!f.length) return;
+  const a = document.activeElement, first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && (a === first || !md.contains(a))) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && (a === last || !md.contains(a))) { e.preventDefault(); first.focus(); }
+});
 $('#ov').addEventListener('click', e => { if (e.target === $('#ov')) close(); });
 </script>
 </body>

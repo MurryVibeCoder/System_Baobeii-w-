@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Lily &amp; Lotus">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B8%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
 <style>
 :root{--sh:0 18px 50px -22px var(--dsh);--ease:cubic-bezier(.2,.9,.3,1.15)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -401,10 +402,12 @@ input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;displa
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCkZREVcgOqQjzFDj9qU2wmkN0QjpGT6Eg",
+  authDomain: "baobei-237ef.firebaseapp.com",
+  projectId: "baobei-237ef",
+  storageBucket: "baobei-237ef.firebasestorage.app",
+  messagingSenderId: "558601536273",
+  appId: "1:558601536273:web:672af8f0a65ad8cb64c2b0"
 };
 /* ---------- Themes ---------- */
 const CATS = { date: 'Date', school: 'School Works', other: 'Others' };
@@ -634,7 +637,7 @@ async function startSync() {
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     await firebase.auth().signInAnonymously();
     c = firebase.firestore();
-  } catch (e) { }
+    } catch (e) { console.error('Firebase setup failed:', e); toast('Sync error: ' + (e.code || e.message)); }
   if (!c || !role) { setSync('off'); return; }
   SYNC.db = c;
   const timer = setTimeout(() => setSync('off'), 10000);
@@ -654,7 +657,7 @@ async function startSync() {
       if (!md.fromCache) SYNC.ready = true;
       render();
       if (!md.fromCache) migrate(snap);
-    }, e => { clearTimeout(timer); setSync('off'); SYNC.db = null; });
+        }, e => { console.error('Firestore error:', e); toast('Sync error: ' + (e.code || e.message)); clearTimeout(timer); setSync('off'); SYNC.db = null; });
   } catch (e) { clearTimeout(timer); setSync('off'); SYNC.db = null; }
 }
 
@@ -1094,6 +1097,7 @@ document.addEventListener('keydown', e => {
   else if (!e.shiftKey && (a === last || !md.contains(a))) { e.preventDefault(); first.focus(); }
 });
 $('#ov').addEventListener('click', e => { if (e.target === $('#ov')) close(); });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>
 </html>

@@ -401,10 +401,12 @@ input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;displa
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCkZREVcgOqQjzFDj9qU2wmkN0QjpGT6Eg",
+  authDomain: "baobei-237ef.firebaseapp.com",
+  projectId: "baobei-237ef",
+  storageBucket: "baobei-237ef.firebasestorage.app",
+  messagingSenderId: "558601536273",
+  appId: "1:558601536273:web:672af8f0a65ad8cb64c2b0"
 };
 /* ---------- Themes ---------- */
 const CATS = { date: 'Date', school: 'School Works', other: 'Others' };
@@ -634,7 +636,7 @@ async function startSync() {
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     await firebase.auth().signInAnonymously();
     c = firebase.firestore();
-  } catch (e) { }
+    } catch (e) { console.error('Firebase setup failed:', e); toast('Sync error: ' + (e.code || e.message)); }
   if (!c || !role) { setSync('off'); return; }
   SYNC.db = c;
   const timer = setTimeout(() => setSync('off'), 10000);
@@ -654,7 +656,7 @@ async function startSync() {
       if (!md.fromCache) SYNC.ready = true;
       render();
       if (!md.fromCache) migrate(snap);
-    }, e => { clearTimeout(timer); setSync('off'); SYNC.db = null; });
+        }, e => { console.error('Firestore error:', e); toast('Sync error: ' + (e.code || e.message)); clearTimeout(timer); setSync('off'); SYNC.db = null; });
   } catch (e) { clearTimeout(timer); setSync('off'); SYNC.db = null; }
 }
 

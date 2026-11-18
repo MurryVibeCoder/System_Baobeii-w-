@@ -396,7 +396,16 @@ input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;displa
 <div id="login" role="dialog" aria-label="Sign in"></div>
 <button class="btn" id="lhelp" aria-label="Help">?</button>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT",
+  appId: "YOUR_APP_ID"
+};
 /* ---------- Themes ---------- */
 const CATS = { date: 'Date', school: 'School Works', other: 'Others' };
 /* Older saved dates used removed categories: map them to the new ones */
@@ -621,7 +630,11 @@ async function startSync() {
   startRoom();
   setSync('wait');
   let c = null;
-  try { c = window.claude && claude.use ? await claude.use('db') : null; } catch (e) { }
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    await firebase.auth().signInAnonymously();
+    c = firebase.firestore();
+  } catch (e) { }
   if (!c || !role) { setSync('off'); return; }
   SYNC.db = c;
   const timer = setTimeout(() => setSync('off'), 10000);

@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lily &amp; Lotus Dates</title>
+<meta name="description" content="A private shared calendar for two.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B8%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--sh:0 18px 50px -22px var(--dsh);--ease:cubic-bezier(.2,.9,.3,1.15)}
@@ -276,6 +278,28 @@ body::after{content:"";position:fixed;inset:0;z-index:1000;pointer-events:none;o
 .pane.open .box{box-shadow:0 36px 80px -34px var(--a),inset 0 1px 0 rgba(255,255,255,.22)}
 .pane .sub{letter-spacing:.01em}
 @media (max-width:700px){.pane.him{box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}}
+
+/* Passcode fields with a Show/Hide toggle */
+.pw{position:relative;display:block;width:100%}
+.pw input{width:100%;padding-right:66px!important}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);min-height:34px;padding:4px 11px;border:0;border-radius:99px;background:none;font-size:12.5px;font-weight:600;color:var(--pink);cursor:pointer}
+.pane .eye{color:var(--a)}
+.eye:hover,.eye[aria-pressed=true]{background:color-mix(in srgb,currentColor 14%,transparent)}
+
+/* ===== Final polish ===== */
+html:has(.ov.show){overflow:hidden}
+h1,h2,.sub,.brand p{text-wrap:balance}
+.actions .btn:not(.pri){min-height:36px;padding:6px 14px;font-size:14px;background:color-mix(in srgb,var(--surf) 55%,transparent);box-shadow:none}
+/* Entrance animations only when the month changes, not on every edit or filter */
+.cell{animation:none}
+#body.anim .cell{animation-name:rise;animation-duration:.5s;animation-timing-function:var(--ease);animation-fill-mode:backwards}
+.item{animation:none}
+#up.anim .item{animation-name:rise;animation-duration:.45s;animation-timing-function:var(--ease);animation-fill-mode:backwards}
+.f .chk{flex-direction:row;align-items:center;gap:8px;font-size:14px;color:var(--ink)}
+.f .chk input{width:18px;height:18px;padding:0;accent-color:var(--pink)}
+.toast .tact{margin-left:14px;border:0;background:none;color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}
+.modal :focus-visible,.pane :focus-visible{outline-offset:1px}
 </style>
 </head>
 <body>
@@ -314,12 +338,15 @@ body::after{content:"";position:fixed;inset:0;z-index:1000;pointer-events:none;o
 
 <script>
 /* ---------- Themes ---------- */
-const CATS = { date: 'Date night', family: 'Family', work: 'Work', care: 'Self-care', other: 'Other' };
+const CATS = { date: 'Date', school: 'School Works', other: 'Others' };
+/* Older saved dates used removed categories: map them to the new ones */
+const LEGACY = { family: 'other', work: 'school', care: 'other' };
+function fixCat(o) { if (o && !CATS[o.cat] && LEGACY[o.cat]) { o.cat = LEGACY[o.cat]; return true; } return false; }
 const THEME = {
   her: {
     dark: 0, name: ['Lily Dates', 'Your schedule, in bloom'],
     v: { bg: '#fff3f8', surf: '#fff', ink: '#4a1f33', mut: '#946781', pink: '#e8588f', deep: '#b02a63', blush: '#ffe4ef', line: '#f7cfe0', g1: '#ff8dbb', g2: '#d63a82', glow: '#ffe4ef', ovl: 'rgba(74,31,51,.45)', dsh: 'rgba(232,88,143,.4)' },
-    cat: { date: '#e8588f', family: '#ee8b4f', work: '#9b5de5', care: '#d63fa6', other: '#b8749a' },
+    cat: { date: '#e8588f', school: '#9b5de5', other: '#b8749a' },
     defs: '<radialGradient id="g-her" cx="50%" cy="88%" r="95%"><stop offset="0" stop-color="#fff8fb"/><stop offset=".55" stop-color="#ffc2da"/><stop offset="1" stop-color="#ee6a9f"/></radialGradient>',
     art() {
       let p = '';
@@ -330,7 +357,7 @@ const THEME = {
   him: {
     dark: 1, name: ['Midnight Lotus', 'Your schedule, in still water'],
     v: { bg: '#000', surf: '#0b0810', ink: '#f1e8ff', mut: '#a994cc', pink: '#a45cff', deep: '#c79bff', blush: '#150e24', line: '#33205a', g1: '#b58bff', g2: '#6a22c9', glow: 'rgba(164,92,255,.22)', ovl: 'rgba(0,0,0,.65)', dsh: 'rgba(164,92,255,.45)' },
-    cat: { date: '#a45cff', family: '#e056c9', work: '#6f7bff', care: '#2fb8a6', other: '#8b7aa8' },
+    cat: { date: '#a45cff', school: '#6f7bff', other: '#8b7aa8' },
     defs: '<linearGradient id="g-b" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#3b138a"/><stop offset="1" stop-color="#9a5cf0"/></linearGradient>',
     art() {
       let p = '';
@@ -376,7 +403,48 @@ const enc = o => btoa(unescape(encodeURIComponent(JSON.stringify(o))));
 const dec = s => JSON.parse(decodeURIComponent(escape(atob(s.trim()))));
 const lily = () => THEME[role].art();
 const col = c => THEME[role].cat[c];
-function toast(m) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; $('#toasts').append(t); setTimeout(() => t.remove(), 3100); }
+function toast(m, undo) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = m;
+  if (undo) { const b = document.createElement('button'); b.type = 'button'; b.className = 'tact'; b.textContent = 'Undo'; b.onclick = () => { undo(); t.remove(); }; t.append(b); t.style.animationDelay = '0s,4.6s'; }
+  $('#toasts').append(t); setTimeout(() => t.remove(), undo ? 5200 : 3100);
+}
+
+/* ---------- Hidden passcode fields with a Show/Hide toggle ---------- */
+let _ask = null, _ret = null;
+const EYE = '<button type="button" class="eye" aria-label="Show passcode" aria-pressed="false">Show</button>';
+function hideEyes() {
+  document.querySelectorAll('#login .eye').forEach(b => { const i = b.parentElement.querySelector('input'); if (i) i.type = 'password'; b.textContent = 'Show'; b.setAttribute('aria-pressed', 'false'); });
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('.eye'); if (!b) return;
+  const i = b.parentElement.querySelector('input'), show = i.type === 'password';
+  i.type = show ? 'text' : 'password';
+  b.textContent = show ? 'Hide' : 'Show';
+  b.setAttribute('aria-pressed', String(show));
+  i.focus();
+});
+/* Replaces prompt(): the typed text is never shown unless the person taps Show.
+   o: { title, msg, label, ok, confirm (ask twice), check(value) -> error text or '' } */
+function askSecret(o) {
+  return new Promise(res => {
+    _ask = res;
+    open(`<h2>${o.title}</h2><form id="sf" class="f" autocomplete="off"><p class="w" style="margin:0;color:var(--mut)">${o.msg}</p>
+<label class="w">${o.label}<span class="pw"><input name="v" type="password" required autocomplete="off">${EYE}</span></label>
+${o.confirm ? `<label class="w">Confirm<span class="pw"><input name="v2" type="password" required autocomplete="off">${EYE}</span></label>` : ''}
+<div class="err w" id="se" role="alert"></div>
+<div class="foot w"><button type="button" class="btn" id="cx">Cancel</button><button class="btn pri">${o.ok || 'Confirm'}</button></div></form>`);
+    $('#cx').onclick = close;
+    $('#sf').onsubmit = async ev => {
+      ev.preventDefault();
+      const el = ev.target.elements, v = el.v.value, err = $('#se');
+      err.textContent = '';
+      if (o.confirm && v !== el.v2.value) { err.textContent = 'The two entries don’t match.'; return; }
+      const m = o.check ? await o.check(v) : '';
+      if (m) { err.textContent = m; el.v.select(); return; }
+      _ask = null; close(); res(v);
+    };
+  });
+}
 
 /* ---------- Storage (localStorage with in-memory fallback) ---------- */
 const mem = {};
@@ -446,7 +514,7 @@ function noteFail() {
 const tooMany = () => `Too many tries. Wait ${Math.ceil(waitMs() / 1000)}s.`;
 
 /* ---------- State ---------- */
-let events = [], cat = 'all', role = null, sel = ymd(new Date());
+let events = [], cat = 'all', role = null, sel = ymd(new Date()), animNext = true;
 let view = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 const list = () => events.filter(e => cat === 'all' || e.cat === cat).sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
 async function save(o) { const i = events.findIndex(x => x.id === o.id); i < 0 ? events.push(o) : events[i] = o; await DB.put(o); }
@@ -454,12 +522,13 @@ async function save(o) { const i = events.findIndex(x => x.id === o.id); i < 0 ?
 /* ---------- Rendering ---------- */
 function renderCal() {
   $('#title').textContent = `${MN[view.getMonth()]} ${view.getFullYear()}`;
+  $('#body').classList.toggle('anim', animNext); $('#up').classList.toggle('anim', animNext); animNext = false;
   const L = list(), st = new Date(view); st.setDate(1 - view.getDay());
   let h = '<div class="wk">' + ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `<div>${d}</div>`).join('') + '</div><div class="grid">';
   for (let i = 0; i < 42; i++) {
     const d = new Date(st); d.setDate(st.getDate() + i);
     const k = ymd(d), ev = L.filter(e => e.date === k);
-    h += `<div class="cell ${d.getMonth() !== view.getMonth() ? 'out' : ''} ${k === ymd(new Date()) ? 'today' : ''}" data-d="${k}" tabindex="0" role="button" aria-label="${k}"><span class="n">${d.getDate()}</span>`
+    h += `<div class="cell ${d.getMonth() !== view.getMonth() ? 'out' : ''} ${k === ymd(new Date()) ? 'today' : ''}" data-d="${k}" tabindex="0" role="button" aria-label="${nice(k)}"><span class="n">${d.getDate()}</span>`
       + ev.slice(0, 2).map(e => `<button class="pill ${e.done ? 'done' : ''}" data-id="${e.id}" style="--c:${col(e.cat)}" title="${esc(e.title)}">${tm(e.start).replace(' ', '').toLowerCase()} ${esc(e.title)}</button>`).join('')
       + (ev.length > 2 ? `<span class="more">+${ev.length - 2} more</span>` : '') + '</div>';
   }
@@ -480,18 +549,25 @@ function buildChips() {
 
 /* ---------- Modals ---------- */
 function open(h, cls = '') {
+  if (!$('#ov').classList.contains('show')) _ret = document.activeElement;
   $('#md').className = 'modal ' + cls;
   $('#md').innerHTML = h;
   $('#ov').classList.add('show');
   const f = $('#md input,#md textarea'); f && f.focus();
 }
-function close() { $('#ov').classList.remove('show'); }
+function close() {
+  $('#ov').classList.remove('show');
+  if (_ask) { const r = _ask; _ask = null; r(null); }
+  if (_ret && _ret.tagName !== 'INPUT' && _ret.focus) { try { _ret.focus({ preventScroll: true }); } catch (e) { } }
+  _ret = null;
+}
 function form(id, date) {
   const e = events.find(x => x.id === id) || { date: date || sel, start: '18:00', end: '20:00', cat: 'date', title: '', place: '', notes: '' };
   open(`<h2>${id ? 'Edit date' : 'New date'}</h2><form id="f" class="f"><label class="w">Title<input name="title" required maxlength="80" value="${esc(e.title)}" placeholder="Dinner under the lanterns"></label>
 <label>Date<input type="date" name="date" required value="${e.date}"></label><label>Category<select name="cat">${Object.entries(CATS).map(([k, v]) => `<option value="${k}" ${k === e.cat ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
 <label>Starts<input type="time" name="start" value="${e.start || ''}"></label><label>Ends<input type="time" name="end" value="${e.end || ''}"></label>
 <label class="w">Place<input name="place" maxlength="80" value="${esc(e.place)}"></label><label class="w">Notes<textarea name="notes" rows="3">${esc(e.notes)}</textarea></label>
+${id ? `<label class="w chk"><input type="checkbox" name="done" ${e.done ? 'checked' : ''}> Mark as done</label>` : ''}
 <div class="foot w">${id ? '<button type="button" class="btn del" id="rm">Delete date</button>' : ''}<button type="button" class="btn" id="cx">Cancel</button><button class="btn pri">Save date</button></div></form>`);
   $('#cx').onclick = close;
   if (id) $('#rm').onclick = () => remove(id);
@@ -499,7 +575,7 @@ function form(id, date) {
     ev.preventDefault();
     const o = Object.fromEntries(new FormData(ev.target));
     o.id = id || Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    o.done = e.done || false;
+    o.done = ev.target.elements.done ? ev.target.elements.done.checked : false;
     if (o.start && o.end && o.end <= o.start) return toast('End time must be after the start time');
     const clash = events.find(x => x.id !== o.id && x.date === o.date && x.start && o.start && x.end && o.end && x.start < o.end && o.start < x.end);
     await save(o);
@@ -509,7 +585,11 @@ function form(id, date) {
     toast(clash ? `Saved, but it overlaps “${clash.title}”` : DB.db ? 'Date saved' : 'Saved for this visit only');
   };
 }
-async function remove(id) { events = events.filter(x => x.id !== id); await DB.del(id); close(); render(); toast('Date deleted'); }
+async function remove(id) {
+  const o = events.find(x => x.id === id);
+  events = events.filter(x => x.id !== id); await DB.del(id); close(); render();
+  toast('Date deleted', async () => { if (o) { await save(o); render(); toast('Date restored'); } });
+}
 
 function box(title, intro, text, readonly, onImport) {
   open(`<h2>${title}</h2><p style="color:var(--mut);margin:0 0 8px">${intro}</p><textarea id="js" rows="8" style="width:100%"${readonly ? ' readonly' : ''}>${esc(text)}</textarea><div class="foot"><button class="btn" id="cx">Close</button><button class="btn ${onImport ? '' : 'pri'}" id="cp">Copy</button>${onImport ? '<button class="btn pri" id="im">Import</button>' : ''}</div>`);
@@ -519,12 +599,15 @@ function box(title, intro, text, readonly, onImport) {
 }
 
 /* Re-check the signed-in person's passcode before risky actions */
-async function confirmPass(msg) {
-  if (waitMs()) { alert(tooMany()); return false; }
-  const pw = prompt(msg);
-  if (pw === null) return false;
+async function confirmPass(title, msg) {
+  if (waitMs()) { toast(tooMany()); return false; }
   const a = ACC.get()[role];
-  if (await kdf(pw, a.salt, a.it) !== a.h) { noteFail(); alert('That passcode is incorrect.'); return false; }
+  const v = await askSecret({ title, msg, label: 'Passcode', ok: 'Confirm', check: async pw => {
+    if (waitMs()) return tooMany();
+    if (await kdf(pw, a.salt, a.it) !== a.h) { noteFail(); return waitMs() ? tooMany() : 'That passcode is incorrect.'; }
+    return '';
+  } });
+  if (v === null) return false;
   LS.d('ld-fail'); return true;
 }
 
@@ -532,18 +615,18 @@ $('#bk').onclick = () => box('Backup', 'Copy this text to keep a backup, or past
   try {
     const a = JSON.parse($('#js').value);
     if (!Array.isArray(a)) throw 0;
-    for (const o of a) if (o && o.id && o.title && o.date && CATS[o.cat]) await save(o);
+    for (const o of a) { fixCat(o); if (o && o.id && o.title && o.date && CATS[o.cat]) await save(o); }
     close(); render(); toast('Backup imported');
   } catch (e) { toast('That text isn’t a valid backup'); }
 });
 
 $('#lnkdev').onclick = async () => {
-  if (!await confirmPass('Enter your passcode to create a link code:')) return;
+  if (!await confirmPass('Link device', 'Enter your passcode to create a link code.')) return;
   box('Link device', 'Copy this code, then on your other device choose “Already have an account on another device?” and paste it. Treat it like a password, and don’t share it.', enc({ acc: { [role]: ACC.get()[role] }, events }), true);
 };
 
 $('#rst').onclick = async () => {
-  if (!await confirmPass('Enter your passcode to delete ALL dates on this device:')) return;
+  if (!await confirmPass('Reset data', 'Enter your passcode to delete ALL dates on this device.')) return;
   if (!confirm('Delete ALL dates on this device? This cannot be undone.')) return;
   for (const o of events.slice()) await DB.del(o.id);
   events = []; render(); toast('All dates deleted');
@@ -563,10 +646,10 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') close();
   if (e.key === 'Enter' && e.target.classList.contains('cell')) e.target.click();
 });
-const go = n => { view = new Date(view.getFullYear(), view.getMonth() + n, 1); render(); };
+const go = n => { view = new Date(view.getFullYear(), view.getMonth() + n, 1); animNext = true; render(); };
 $('#prev').onclick = () => go(-1);
 $('#nxt').onclick = () => go(1);
-$('#today').onclick = () => { const n = new Date(); view = new Date(n.getFullYear(), n.getMonth(), 1); sel = ymd(n); render(); };
+$('#today').onclick = () => { const n = new Date(); view = new Date(n.getFullYear(), n.getMonth(), 1); sel = ymd(n); animNext = true; render(); };
 $('#new').onclick = () => form(null, sel);
 
 function applyTheme(r) {
@@ -585,17 +668,18 @@ function buildLogin() {
   $('#login').innerHTML = '<h1 class="lt">Who’s signing in?</h1><button type="button" class="lk" id="lkimp">Already have an account on another device?</button>' + ['her', 'him'].map(r => {
     const a = acc[r], g = r === 'her';
     return `<section class="pane ${r}" data-r="${r}"><div class="box"><div class="lg">${THEME[r].art()}</div><h2>${g ? 'Girlfriend' : 'Boyfriend'}</h2><p class="sub">${a ? 'Welcome back, ' + esc(a.name) : g ? 'Step into the lily garden' : 'Step into the midnight lotus'}</p>
-<form data-r="${r}" autocomplete="off">${a ? '' : '<input name="name" placeholder="Your name" maxlength="24" required>'}<input name="pw" type="password" placeholder="${a ? 'Passcode' : 'Create a passcode (6+ characters)'}" minlength="${a ? 1 : 6}" required autocomplete="${a ? 'current-password' : 'new-password'}"><label class="keep"><input type="checkbox" name="keep"> Keep me signed in for 14 days on this device</label><div class="err" role="alert"></div><button class="go">${a ? 'Enter' : 'Create and enter'}</button><div class="lnk">${a ? '<button type="button" class="lk" data-reset>Forgot passcode?</button>' : ''}<button type="button" class="lk" data-back>Back</button></div></form><p class="tap">Tap to sign in</p></div></section>`;
+<form data-r="${r}" autocomplete="off">${a ? '' : '<input name="name" placeholder="Your name" maxlength="24" required>'}<span class="pw"><input name="pw" type="password" placeholder="${a ? 'Passcode' : 'Create a passcode (6+ characters)'}" minlength="${a ? 1 : 6}" required autocomplete="${a ? 'current-password' : 'new-password'}">${EYE}</span><label class="keep"><input type="checkbox" name="keep"> Keep me signed in for 14 days on this device</label><div class="err" role="alert"></div><button class="go">${a ? 'Enter' : 'Create and enter'}</button><div class="lnk">${a ? '<button type="button" class="lk" data-reset>Forgot passcode?</button>' : ''}<button type="button" class="lk" data-back>Back</button></div></form><p class="tap">Tap to sign in</p></div></section>`;
   }).join('');
 }
 function pick(p) {
+  hideEyes();
   document.querySelectorAll('#login .pane').forEach(x => { x.classList.toggle('open', x === p); x.classList.toggle('shrunk', !!p && x !== p); });
   const i = p && p.querySelector('input');
   i && setTimeout(() => i.focus(), 500);
 }
 
 async function importDevice() {
-  const s = prompt('Paste the code from your other device:');
+  const s = await askSecret({ title: 'Link this device', msg: 'Paste the code from your other device.', label: 'Link code', ok: 'Import' });
   if (!s) return;
   try {
     const d = dec(s), have = ACC.get();
@@ -607,7 +691,7 @@ async function importDevice() {
       have[r] = a;
     }
     ACC.set(have);
-    for (const o of (d.events || [])) if (o && o.id && o.title && o.date && CATS[o.cat]) await DB.put(o);
+    for (const o of (d.events || [])) { fixCat(o); if (o && o.id && o.title && o.date && CATS[o.cat]) await DB.put(o); }
     buildLogin(); toast('Account imported. You can sign in now.');
   } catch (e) { alert('That code isn’t valid.'); }
 }
@@ -617,13 +701,17 @@ async function forgot(r) {
   const a = ACC.get(), x = a[r];
   if (!x.rs) return alert('This account has no recovery code. Ask your partner to re-create it from a fresh device, or clear this site’s data.');
   if (waitMs()) return alert(tooMany());
-  const c = prompt('Enter the recovery code you saved when you created this account:');
-  if (!c) return;
-  if (await kdf(normCode(c), x.rs, x.it) !== x.rh) { noteFail(); return alert('That recovery code is incorrect.'); }
-  const pw = prompt('New passcode (6+ characters):');
-  if (!pw || pw.length < 6) return alert('Cancelled: the passcode must be at least 6 characters.');
-  x.salt = rnd(16); x.h = await kdf(pw, x.salt, x.it); ACC.set(a); LS.d('ld-fail');
-  alert('Passcode changed. Sign in with the new one.');
+  const c = await askSecret({ title: 'Recovery code', msg: 'Enter the recovery code you saved when you created this account.', label: 'Recovery code', ok: 'Continue', check: async v => {
+    if (waitMs()) return tooMany();
+    if (await kdf(normCode(v), x.rs, x.it) !== x.rh) { noteFail(); return waitMs() ? tooMany() : 'That recovery code is incorrect.'; }
+    return '';
+  } });
+  if (c === null) return;
+  LS.d('ld-fail');
+  const pw = await askSecret({ title: 'New passcode', msg: 'Choose a new passcode (6+ characters).', label: 'New passcode', ok: 'Change passcode', confirm: true, check: async v => v.length < 6 ? 'Use at least 6 characters.' : '' });
+  if (pw === null) return;
+  x.salt = rnd(16); x.h = await kdf(pw, x.salt, x.it); ACC.set(a);
+  toast('Passcode changed. Sign in with the new one.');
 }
 
 $('#login').addEventListener('click', e => {
@@ -667,6 +755,7 @@ async function signIn(r, keep) {
   SS.s('ld-role', r);
   keep ? LS.s('ld-keep', JSON.stringify({ r, exp: Date.now() + 14 * 864e5 })) : LS.d('ld-keep');
   events = await DB.all();
+  for (const o of events) if (fixCat(o)) await DB.put(o);
   $('#login').innerHTML = '';
   delete THEME[r === 'her' ? 'him' : 'her'];
   $('#defs').innerHTML = THEME[r].defs;
@@ -730,10 +819,10 @@ function showHelp() {
 const HELP_HTML = `<h2>How to use</h2><div class="help">
 <p>Tap a section to open it.</p>
 <details open><summary>Plan a date</summary><div><ol><li>Tap a day on the calendar, or press <b>+</b> (<b>+ New date</b> on a computer).</li><li>Add a title, the time, place and notes, then tap <b>Save date</b>.</li><li>Tap a date on the calendar or in <b>Coming up</b> to edit or delete it.</li></ol><div class="tip">Dates are shared: both of you see the same calendar on this device. A warning appears if two dates overlap.</div></div></details>
-<details><summary>Find your way around</summary><div><ul><li><b>‹ ›</b> change month, <b>Today</b> jumps back.</li><li>The colored chips filter by category (Date night, Family, Work…).</li><li><b>Next up</b> shows your very next date.</li><li>On a phone, dots on a day mean there are dates. Open <b>Coming up</b> to read them.</li></ul></div></details>
+<details><summary>Find your way around</summary><div><ul><li><b>‹ ›</b> change month, <b>Today</b> jumps back.</li><li>The colored chips filter by category (Date, School Works, Others).</li><li><b>Next up</b> shows your very next date.</li><li>On a phone, dots on a day mean there are dates. Open <b>Coming up</b> to read them.</li></ul></div></details>
 <details><summary>Use it on another phone or computer</summary><div><ol><li>On the device where you’re signed in, tap <b>Link device</b> and enter your passcode.</li><li>Tap <b>Copy</b> to copy the code.</li><li>On the new device, open this same page and tap <b>Already have an account on another device?</b></li><li>Paste the code into the box that appears, then press OK.</li><li>Pick your side and sign in with your passcode.</li></ol><div class="tip">Paste the code only in that box, never in the browser’s address bar. Each of you links your own account. The code copies your dates once, so make a new code later to catch up.</div></div></details>
 <details><summary>Keep a backup</summary><div><p>Tap <b>Backup</b> and copy the text to save your dates somewhere safe. To restore, paste it into the same box and tap <b>Import</b>. Clearing your browser’s data deletes your dates, so back up now and then.</p></div></details>
-<details><summary>Passcode and signing in</summary><div><ul><li>Your passcode needs 6 or more characters.</li><li>When you create an account you get a <b>recovery code</b>. Write it down, it’s shown only once.</li><li>Forgot your passcode? Tap <b>Forgot passcode?</b> and enter the recovery code.</li><li><b>Keep me signed in</b> lasts 14 days on that device.</li><li>After several wrong tries you have to wait a little before trying again.</li></ul></div></details>
+<details><summary>Passcode and signing in</summary><div><ul><li>Your passcode needs 6 or more characters. It stays hidden as you type, and <b>Show</b> lets you check it.</li><li>When you create an account you get a <b>recovery code</b>. Write it down, it’s shown only once.</li><li>Forgot your passcode? Tap <b>Forgot passcode?</b> and enter the recovery code.</li><li><b>Keep me signed in</b> lasts 14 days on that device.</li><li>After several wrong tries you have to wait a little before trying again.</li></ul></div></details>
 <details><summary>Edit your profile</summary><div><ul><li>Tap <b>Profile</b> to change your name, passcode or recovery code.</li><li>Changing the passcode or recovery code needs your current passcode.</li><li>Changes apply to this device. On another device, make a new <b>Link device</b> code to update it.</li></ul></div></details>
 <details><summary>Log out and reset</summary><div><p><b>Log out</b> returns to the sign-in screen. <b>Reset data</b> deletes all dates on this device after you enter your passcode. It can’t be undone, so back up first.</p></div></details>
 </div><div class="foot"><button class="btn pri" id="cx">Got it</button></div>`;
@@ -743,9 +832,9 @@ function editProfile() {
   const a = ACC.get()[role];
   open(`<h2>Edit profile</h2><form id="pf" class="f" autocomplete="off">
 <label class="w">Name<input name="name" required maxlength="24" value="${esc(a.name)}"></label>
-<label class="w">Current passcode <small>Only needed to change your passcode or recovery code</small><input name="cur" type="password" autocomplete="current-password"></label>
-<label>New passcode<input name="np" type="password" autocomplete="new-password" placeholder="6+ characters"></label>
-<label>Confirm<input name="cp" type="password" autocomplete="new-password"></label>
+<label class="w">Current passcode <small>Only needed to change your passcode or recovery code</small><span class="pw"><input name="cur" type="password" autocomplete="current-password">${EYE}</span></label>
+<label>New passcode<span class="pw"><input name="np" type="password" autocomplete="new-password" placeholder="6+ characters">${EYE}</span></label>
+<label>Confirm<span class="pw"><input name="cp" type="password" autocomplete="new-password">${EYE}</span></label>
 <label class="w" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="rc" style="width:18px;height:18px;padding:0"> Generate a new recovery code</label>
 <div class="err w" id="pe" role="alert"></div>
 <div class="foot w"><button type="button" class="btn" id="cx">Cancel</button><button class="btn pri">Save profile</button></div></form>`);

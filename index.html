@@ -410,7 +410,7 @@ function clean(o) {
   const id = s(o.id, 40).replace(/[^\w-]/g, ''), date = s(o.date, 10), title = s(o.title, 80).trim();
   if (!id || !title || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !CATS[o.cat]) return null;
   const t = v => /^\d{2}:\d{2}$/.test(v) ? v : '';
-  return { id, date, title, cat: o.cat, start: t(o.start), end: t(o.end), place: s(o.place, 80), notes: s(o.notes, 2000), done: o.done === true };
+  return { id, date, title, cat: o.cat, start: t(o.start), end: t(o.end), place: s(o.place, 80), notes: s(o.notes, 2000), done: o.done === true, by: o.by === 'her' || o.by === 'him' ? o.by : '', at: Number.isFinite(o.at) ? o.at : 0 };
 }
 const THEME = {
   her: {
@@ -536,12 +536,12 @@ const ACC = {
 };
 
 /* ---------- Live sync (shared database) ---------- */
-const SYNC = { db: null, warned: false };
+const SYNC = { db: null, warned: false, s: 'off', partner: false, ready: false };
 const sref = id => SYNC.db.doc('dates/' + id);
 function setSync(s) {
   const el = $('#sync'); if (!el) return;
-  el.hidden = false; el.dataset.s = s;
-  el.textContent = s === 'live' ? 'Live' : s === 'wait' ? 'Connecting…' : 'Offline';
+  SYNC.s = s; el.hidden = false; el.dataset.s = s;
+  el.textContent = s === 'live' ? (SYNC.partner ? 'Live · ' + partnerWord().toLowerCase() + ' is here' : 'Live') : s === 'wait' ? 'Connecting…' : 'Offline';
   el.title = s === 'live' ? 'Changes appear on every device instantly' : s === 'wait' ? 'Reaching the shared calendar' : 'Changes stay on this device until you are back online';
 }
 async function push(fn) {
@@ -589,7 +589,36 @@ async function migrate(snap) {
   for (const o of (await DB.all()).map(clean).filter(Boolean)) if (!have.has(o.id)) await push(() => sref(o.id).set(o));
   LS.s('ld-synced', '1');
 }
+const partnerWord = () => role === 'her' ? 'He' : 'She';
+/* Tell the person what their partner just did, the moment it arrives */
+function announce(changes, prev) {
+  const out = [];
+  for (const c of changes) {
+    if (c.type === 'removed') { const p = prev.get(c.doc.id); if (p) out.push(`“${p.title}” was removed`); continue; }
+    if (c.doc.metadata && c.doc.metadata.hasPendingWrites) continue;
+    const o = clean(Object.assign({}, c.doc.data(), { id: c.doc.id }));
+    if (!o || !o.by || o.by === role) continue;
+    const old = prev.get(o.id);
+    if (old && JSON.stringify(old) === JSON.stringify(o)) continue;
+    out.push(`${partnerWord()} ${old ? 'updated' : 'added'} “${o.title}”`);
+  }
+  if (out.length) toast(out.length > 2 ? 'Your partner changed the calendar' : out.join(' · '));
+}
+/* Know when the other person has the calendar open right now */
+async function startRoom() {
+  let r = null;
+  try { r = window.claude && claude.use ? await claude.use('room') : null; } catch (e) { }
+  if (!r || !role) return;
+  try {
+    await r.presence({ role });
+    r.onPeers(ch => {
+      SYNC.partner = ch.peers.some(p => p.presence && p.presence.role && p.presence.role !== role);
+      if (SYNC.s === 'live') setSync('live');
+    });
+  } catch (e) { }
+}
 async function startSync() {
+  startRoom();
   setSync('wait');
   let c = null;
   try { c = window.claude && claude.use ? await claude.use('db') : null; } catch (e) { }
@@ -606,7 +635,10 @@ async function startSync() {
         const o = clean(Object.assign({}, ch.doc.data(), { id: ch.doc.id }));
         if (o) DB.putL(o);
       });
+      const prev = new Map(events.map(x => [x.id, x]));
       events = snap.docs.map(d => clean(Object.assign({}, d.data(), { id: d.id }))).filter(Boolean);
+      if (SYNC.ready) announce(snap.docChanges(), prev);
+      if (!md.fromCache) SYNC.ready = true;
       render();
       if (!md.fromCache) migrate(snap);
     }, e => { clearTimeout(timer); setSync('off'); SYNC.db = null; });
@@ -642,7 +674,7 @@ const tooMany = () => `Too many tries. Wait ${Math.ceil(waitMs() / 1000)}s.`;
 let events = [], cat = 'all', role = null, sel = ymd(new Date()), animNext = true;
 let view = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 const list = () => events.filter(e => cat === 'all' || e.cat === cat).sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
-async function save(o) { const i = events.findIndex(x => x.id === o.id); i < 0 ? events.push(o) : events[i] = o; await DB.put(o); }
+async function save(o) { o.by = role; o.at = Date.now(); const i = events.findIndex(x => x.id === o.id); i < 0 ? events.push(o) : events[i] = o; await DB.put(o); }
 
 /* ---------- Rendering ---------- */
 function renderCal() {
@@ -759,8 +791,9 @@ $('#lnkdev').onclick = async () => {
 $('#rst').onclick = async () => {
   if (!await confirmPass('Reset data', 'Enter your passcode to delete ALL dates for both of you, on every device.')) return;
   if (!confirm('Delete ALL dates for both of you, on every device? This cannot be undone.')) return;
-  for (const o of events.slice()) await DB.del(o.id);
-  events = []; render(); toast('All dates deleted');
+  const all = events.slice(); events = []; render();
+  for (const o of all) await DB.del(o.id);
+  toast('All dates deleted');
 };
 
 /* ---------- App events ---------- */
@@ -990,7 +1023,7 @@ function showHelp() {
 }
 const HELP_HTML = `<h2>How to use</h2><div class="help">
 <p>Tap a section to open it.</p>
-<details open><summary>Plan a date</summary><div><ol><li>Tap a day on the calendar, or press <b>+</b> (<b>+ New date</b> on a computer).</li><li>Add a title, the time, place and notes, then tap <b>Save date</b>.</li><li>Tap a date on the calendar or in <b>Coming up</b> to edit or delete it.</li></ol><div class="tip">Dates are shared and update live: a change made on one phone or computer shows up on the other within moments. The dot next to your name says <b>Live</b> when it’s connected. A warning appears if two dates overlap.</div></div></details>
+<details open><summary>Plan a date</summary><div><ol><li>Tap a day on the calendar, or press <b>+</b> (<b>+ New date</b> on a computer).</li><li>Add a title, the time, place and notes, then tap <b>Save date</b>.</li><li>Tap a date on the calendar or in <b>Coming up</b> to edit or delete it.</li></ol><div class="tip">Dates are shared and update live: a change made on one phone or computer shows up on the other within moments. The dot next to your name says <b>Live</b> when it’s connected, and shows when your partner is here too. You also get a note when they add or change a date. A warning appears if two dates overlap.</div></div></details>
 <details><summary>Find your way around</summary><div><ul><li><b>‹ ›</b> change month, <b>Today</b> jumps back.</li><li>The colored chips filter by category (Date, School Works, Others).</li><li><b>Next up</b> shows your very next date.</li><li>On a phone, dots on a day mean there are dates. Tap a day to read them under the calendar, and swipe the calendar left or right to change month. <b>Menu</b> holds Profile, Backup and the rest.</li></ul></div></details>
 <details><summary>Use it on another phone or computer</summary><div><ol><li>Open this same page on the other device and sign in to Claude there.</li><li>On the device where you’re signed in here, tap <b>Link device</b> and enter your passcode, then tap <b>Copy</b>.</li><li>On the new device, tap <b>Already have an account on another device?</b></li><li>Paste the code into the box that appears, then press OK.</li><li>Pick your side and sign in with your passcode.</li></ol><div class="tip">Paste the code only in that box, never in the browser’s address bar. Each of you links your own account. The code carries your sign-in only: your dates arrive by themselves through live sync.</div></div></details>
 <details><summary>Keep a backup</summary><div><p>Tap <b>Backup</b> and copy the text to save your dates somewhere safe. To restore, paste it into the same box and tap <b>Import</b>. Restored dates are shared with your partner too.</p></div></details>

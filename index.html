@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lily &amp; Lotus Dates</title>
 <meta name="description" content="A private shared calendar for two.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lily &amp; Lotus">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B8%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -300,6 +304,29 @@ h1,h2,.sub,.brand p{text-wrap:balance}
 .toast .tact{margin-left:14px;border:0;background:none;color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 button:disabled{opacity:.55;cursor:not-allowed}
 .modal :focus-visible,.pane :focus-visible{outline-offset:1px}
+
+/* ===== Mobile ===== */
+.card.day,#menu{display:none}
+.dayhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.day h3.t{margin:0}
+.menu{display:grid;gap:8px}
+.mi{min-height:52px;text-align:left;padding:12px 16px;border:1.5px solid var(--line);border-radius:16px;background:var(--blush);font-size:16px;font-weight:500}
+.mi[data-go=rst]{color:#d6336c}
+@media (max-width:700px){
+  body{overscroll-behavior-y:none;-webkit-text-size-adjust:100%}
+  .layout{gap:14px}
+  .card.day{display:block}
+  #menu{display:inline-flex;align-items:center}
+  #prof,#hlp,#out,#bk,#lnkdev,#rst{display:none}
+  .actions{overflow:visible;margin:0;padding:0;justify-content:space-between;flex-wrap:nowrap}
+  .who{font-size:23px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .nav .btn{min-height:44px;min-width:44px}
+  .chip{min-height:38px}
+  .cell.sel{border-color:var(--pink);box-shadow:0 0 0 1px var(--pink),0 8px 20px -12px var(--pink)}
+  .pane{overflow-y:auto;align-content:safe center}
+  #lkimp{font-size:13px;white-space:nowrap}
+  .modal{touch-action:pan-y}
+}
 </style>
 </head>
 <body>
@@ -309,7 +336,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
     <div class="brand"><span id="logo"></span><div><h1 id="h1"></h1><p id="tag"></p></div></div>
     <div class="actions">
       <span class="who" id="who"></span>
-      <button class="btn" id="prof">Profile</button><button class="btn" id="hlp">Help</button><button class="btn" id="out">Log out</button>
+      <button class="btn" id="menu">Menu</button><button class="btn" id="prof">Profile</button><button class="btn" id="hlp">Help</button><button class="btn" id="out">Log out</button>
       <button class="btn" id="bk">Backup</button>
       <button class="btn" id="lnkdev">Link device</button>
       <button class="btn" id="rst">Reset data</button>
@@ -326,6 +353,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
       <div id="body"></div>
     </section>
     <aside class="side">
+      <div class="card day" id="day"></div>
       <div class="card next" id="next"></div>
       <div class="card"><h3 class="t">Coming up</h3><div id="up"></div></div>
     </aside>
@@ -411,6 +439,7 @@ function toast(m, undo) {
 
 /* ---------- Hidden passcode fields with a Show/Hide toggle ---------- */
 let _ask = null, _ret = null;
+const isMobile = () => matchMedia('(max-width:700px)').matches;
 const EYE = '<button type="button" class="eye" aria-label="Show passcode" aria-pressed="false">Show</button>';
 function hideEyes() {
   document.querySelectorAll('#login .eye').forEach(b => { const i = b.parentElement.querySelector('input'); if (i) i.type = 'password'; b.textContent = 'Show'; b.setAttribute('aria-pressed', 'false'); });
@@ -528,7 +557,7 @@ function renderCal() {
   for (let i = 0; i < 42; i++) {
     const d = new Date(st); d.setDate(st.getDate() + i);
     const k = ymd(d), ev = L.filter(e => e.date === k);
-    h += `<div class="cell ${d.getMonth() !== view.getMonth() ? 'out' : ''} ${k === ymd(new Date()) ? 'today' : ''}" data-d="${k}" tabindex="0" role="button" aria-label="${nice(k)}"><span class="n">${d.getDate()}</span>`
+    h += `<div class="cell ${d.getMonth() !== view.getMonth() ? 'out' : ''} ${k === ymd(new Date()) ? 'today' : ''} ${k === sel ? 'sel' : ''}" data-d="${k}" tabindex="0" role="button" aria-label="${nice(k)}"><span class="n">${d.getDate()}</span>`
       + ev.slice(0, 2).map(e => `<button class="pill ${e.done ? 'done' : ''}" data-id="${e.id}" style="--c:${col(e.cat)}" title="${esc(e.title)}">${tm(e.start).replace(' ', '').toLowerCase()} ${esc(e.title)}</button>`).join('')
       + (ev.length > 2 ? `<span class="more">+${ev.length - 2} more</span>` : '') + '</div>';
   }
@@ -541,7 +570,12 @@ function renderSide() {
   $('#next').innerHTML = n ? `<small>Next up</small><h3>${esc(n.title)}</h3><small>${nice(n.date)} · ${tm(n.start)}${n.place ? '<br>' + esc(n.place) : ''}</small>` : '<small>Next up</small><h3>Nothing planned</h3><small>Add a date to see it here.</small>';
   $('#up').innerHTML = up.length ? up.slice(0, 5).map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}</b><small>${nice(e.date)} · ${tm(e.start)}</small></button>`).join('') : '<div class="empty">Nothing on the horizon.</div>';
 }
-const render = () => { if (role) { renderCal(); renderSide(); } };
+function renderDay() {
+  const L = list().filter(e => e.date === sel);
+  $('#day').innerHTML = `<div class="dayhead"><h3 class="t">${nice(sel)}</h3><button class="btn pri" id="dayadd">+ Add</button></div>`
+    + (L.length ? L.map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}</b><small>${tm(e.start)}${e.end ? ' – ' + tm(e.end) : ''}${e.place ? ' · ' + esc(e.place) : ''}</small></button>`).join('') : '<div class="empty">Nothing planned for this day.</div>');
+}
+const render = () => { if (role) { renderCal(); renderSide(); renderDay(); } };
 function buildChips() {
   $('#chips').innerHTML = '<button class="chip" data-c="all">All</button>' + Object.entries(CATS).map(([k, v]) => `<button class="chip" data-c="${k}" style="--c:${col(k)}"><i></i>${v}</button>`).join('');
   document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x.dataset.c === cat));
@@ -636,8 +670,15 @@ $('#rst').onclick = async () => {
 document.addEventListener('click', e => {
   if (!role) return;
   const t = e.target, pill = t.closest('[data-id]'), cell = t.closest('.cell'), c = t.closest('.chip');
-  if (pill) return form(pill.dataset.id);
-  if (cell) { sel = cell.dataset.d; return form(null, sel); }
+  const g = t.closest('[data-go]');
+  if (g) { close(); return setTimeout(() => $('#' + g.dataset.go).click(), 0); }
+  if (t.closest('#dayadd')) return form(null, sel);
+  if (pill && !(pill.classList.contains('pill') && isMobile())) return form(pill.dataset.id);
+  if (cell) {
+    sel = cell.dataset.d;
+    if (isMobile()) { render(); return $('#day').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    return form(null, sel);
+  }
   if (c) { cat = c.dataset.c; document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c)); render(); }
   if (t === $('#ov')) close();
 });
@@ -811,6 +852,36 @@ function setFx() {
 const _applyTheme = applyTheme;
 applyTheme = function (r) { _applyTheme(r); setFx(); const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = THEME[r].v.bg; };
 
+/* ---------- Mobile: menu sheet, swipe months, swipe sheet down ---------- */
+$('#menu').onclick = () => {
+  open(`<h2>Menu</h2><div class="menu">${[['prof', 'Edit profile'], ['hlp', 'Help'], ['bk', 'Backup and restore'], ['lnkdev', 'Link another device'], ['rst', 'Reset all dates'], ['out', 'Log out']].map(([id, t]) => `<button type="button" class="mi" data-go="${id}">${t}</button>`).join('')}</div><div class="foot"><button type="button" class="btn" id="cx">Close</button></div>`);
+  $('#cx').onclick = close;
+};
+(() => {
+  const b = $('#body'); let x0 = 0, y0 = 0;
+  b.addEventListener('touchstart', e => { const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; }, { passive: true });
+  b.addEventListener('touchend', e => {
+    const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.6) go(dx < 0 ? 1 : -1);
+  }, { passive: true });
+  const md = $('#md'); let sy = null, d = 0;
+  md.addEventListener('touchstart', e => {
+    if (!isMobile()) return;
+    const t = e.touches[0];
+    sy = (t.clientY - md.getBoundingClientRect().top < 36 && md.scrollTop === 0) ? t.clientY : null; d = 0;
+  }, { passive: true });
+  md.addEventListener('touchmove', e => {
+    if (sy == null) return;
+    d = Math.max(0, e.touches[0].clientY - sy); md.style.transition = 'none'; md.style.transform = `translateY(${d}px)`;
+  }, { passive: true });
+  md.addEventListener('touchend', () => {
+    if (sy == null) return;
+    sy = null; md.style.transition = 'transform .25s'; md.style.transform = '';
+    if (d > 90) close();
+    setTimeout(() => { md.style.transition = ''; }, 260);
+  });
+})();
+
 /* ---------- Help (neutral palette) ---------- */
 function showHelp() {
   open(HELP_HTML, 'neutral' + (role && THEME[role].dark ? ' dark' : ''));
@@ -819,7 +890,7 @@ function showHelp() {
 const HELP_HTML = `<h2>How to use</h2><div class="help">
 <p>Tap a section to open it.</p>
 <details open><summary>Plan a date</summary><div><ol><li>Tap a day on the calendar, or press <b>+</b> (<b>+ New date</b> on a computer).</li><li>Add a title, the time, place and notes, then tap <b>Save date</b>.</li><li>Tap a date on the calendar or in <b>Coming up</b> to edit or delete it.</li></ol><div class="tip">Dates are shared: both of you see the same calendar on this device. A warning appears if two dates overlap.</div></div></details>
-<details><summary>Find your way around</summary><div><ul><li><b>‹ ›</b> change month, <b>Today</b> jumps back.</li><li>The colored chips filter by category (Date, School Works, Others).</li><li><b>Next up</b> shows your very next date.</li><li>On a phone, dots on a day mean there are dates. Open <b>Coming up</b> to read them.</li></ul></div></details>
+<details><summary>Find your way around</summary><div><ul><li><b>‹ ›</b> change month, <b>Today</b> jumps back.</li><li>The colored chips filter by category (Date, School Works, Others).</li><li><b>Next up</b> shows your very next date.</li><li>On a phone, dots on a day mean there are dates. Tap a day to read them under the calendar, and swipe the calendar left or right to change month. <b>Menu</b> holds Profile, Backup and the rest.</li></ul></div></details>
 <details><summary>Use it on another phone or computer</summary><div><ol><li>On the device where you’re signed in, tap <b>Link device</b> and enter your passcode.</li><li>Tap <b>Copy</b> to copy the code.</li><li>On the new device, open this same page and tap <b>Already have an account on another device?</b></li><li>Paste the code into the box that appears, then press OK.</li><li>Pick your side and sign in with your passcode.</li></ol><div class="tip">Paste the code only in that box, never in the browser’s address bar. Each of you links your own account. The code copies your dates once, so make a new code later to catch up.</div></div></details>
 <details><summary>Keep a backup</summary><div><p>Tap <b>Backup</b> and copy the text to save your dates somewhere safe. To restore, paste it into the same box and tap <b>Import</b>. Clearing your browser’s data deletes your dates, so back up now and then.</p></div></details>
 <details><summary>Passcode and signing in</summary><div><ul><li>Your passcode needs 6 or more characters. It stays hidden as you type, and <b>Show</b> lets you check it.</li><li>When you create an account you get a <b>recovery code</b>. Write it down, it’s shown only once.</li><li>Forgot your passcode? Tap <b>Forgot passcode?</b> and enter the recovery code.</li><li><b>Keep me signed in</b> lasts 14 days on that device.</li><li>After several wrong tries you have to wait a little before trying again.</li></ul></div></details>

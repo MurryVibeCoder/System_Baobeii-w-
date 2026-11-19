@@ -462,6 +462,16 @@ input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;displa
   mask-image:radial-gradient(ellipse closest-side,#000 45%,transparent 100%);
   filter:blur(1px);
   animation:vfade 7s ease-in-out infinite alternate;
+
+/* Initial badge alignment */
+.by{display:inline-flex;align-items:center;justify-content:center;flex:none;line-height:1;padding-top:.05em}
+/* Day list: badge and title on one centered row, subtitle lined up under the title */
+.item b:has(.by){display:flex;align-items:center;gap:8px}
+.item b .by{width:22px;height:22px;margin:0;font-size:12px}
+.item b:has(.by)+small{display:block;padding-left:30px}
+/* Calendar pills (desktop) */
+.pill .by{width:1.5em;height:1.5em;margin-right:5px;font-size:.8em;vertical-align:-.25em}
+
 }
 @keyframes vfade{from{opacity:.85}to{opacity:1}}
 .pane.shrunk .box::before{opacity:.55;animation:none}

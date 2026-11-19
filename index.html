@@ -627,7 +627,19 @@ const t = document.createElement('div'); t.className = 'toast'; t.textContent = 
 if (undo) { const b = document.createElement('button'); b.type = 'button'; b.className = 'tact'; b.textContent = 'Undo'; b.onclick = () => { undo(); t.remove(); }; t.append(b); t.style.animationDelay = '0s,4.6s'; }
 $('#toasts').append(t); setTimeout(() => t.remove(), undo ? 5200 : 3100);
 }
-
+async function notify(title, body) {
+  if (!('Notification' in window) || Notification.permission !== 'granted' || !document.hidden) return;
+  const o = { body, icon: 'icon-180.png', tag: 'ld-update', renotify: true };
+  try {
+    const reg = 'serviceWorker' in navigator
+      ? await Promise.race([navigator.serviceWorker.ready, new Promise(r => setTimeout(r, 1500))])
+      : null;
+    reg && reg.showNotification ? reg.showNotification(title, o) : new Notification(title, o);
+  } catch (e) { }
+}
+function askNotify() {
+if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(() => { });
+}
 /* ---------- Hidden passcode fields with a Show/Hide toggle ---------- */
 let _ask = null, _ret = null;
 const isMobile = () => matchMedia('(max-width:700px)').matches;
@@ -738,6 +750,7 @@ for (const o of (await DB.all()).map(clean).filter(Boolean)) if (!have.has(o.id)
 LS.s('ld-synced', '1');
 }
 const partnerWord = () => role === 'her' ? 'He' : 'She';
+const partnerName = () => (ACC.get()[role === 'her' ? 'him' : 'her'] || {}).name || partnerWord();
 /* Tell the person what their partner just did, the moment it arrives */
 function announce(changes, prev) {
 const out = [];
@@ -748,9 +761,12 @@ const o = clean(Object.assign({}, c.doc.data(), { id: c.doc.id }));
 if (!o || !o.by || o.by === role) continue;
 const old = prev.get(o.id);
 if (old && JSON.stringify(old) === JSON.stringify(o)) continue;
-out.push(`${partnerWord()} ${old ? 'updated' : 'added'} “${o.title}”`);
+out.push(old ? `${partnerName()} updated “${o.title}”` : `${partnerName()} set “${o.title}” for ${when(o)}`);
 }
-if (out.length) toast(out.length > 2 ? 'Your partner changed the calendar' : out.join(' · '));
+if (out.length) {
+const msg = out.length > 2 ? 'Your partner changed the calendar' : out.join(' · ');
+toast(msg); notify('Lily & Lotus Dates', msg);
+}
 }
 /* Know when the other person has the calendar open right now */
 async function startRoom() {
@@ -887,7 +903,7 @@ const now = new Date(), nk = ymd(now) + pad(now.getHours()) + ':' + pad(now.getM
 const up = events.filter(e => !e.done && (e.date + (e.start || '23:59')) >= nk).sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
 const n = up[0];
 $('#next').innerHTML = n ? `<small>Next up</small><h3>${esc(n.title)}</h3><small>${when(n)}${n.place ? '<br>' + esc(n.place) : ''}${setBy(n) ? '<br>' + setBy(n) : ''}</small>` : '<small>Next up</small><h3>Nothing planned</h3><small>Add a date to see it here.</small>';
-$('#up').innerHTML = up.length ? up.slice(0, 5).map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}<b>${esc(e.title)}</b><small>${when(e)}${setBy(e) ? ' · ' + setBy(e) : ''}</small></button>`).join('') : '<div class="empty">Nothing on the horizon.</div>'
+$('#up').innerHTML = up.length ? up.slice(0, 5).map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}</b><small>${when(e)}${setBy(e) ? ' · ' + setBy(e) : ''}</small></button>`).join('') : '<div class="empty">Nothing on the horizon.</div>'
 }
 function renderDay() {
 const L = list().filter(e => e.date === sel);
@@ -931,11 +947,12 @@ o.id = id || Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 o.done = ev.target.elements.done ? ev.target.elements.done.checked : false;
 if (o.start && o.end && o.end <= o.start) return toast('End time must be after the start time');
 const clash = events.find(x => x.id !== o.id && x.date === o.date && x.start && o.start && x.end && o.end && x.start < o.end && o.start < x.end);
+askNotify();
 await save(o);
 sel = o.date; close();
 view = new Date(o.date.slice(0, 4), +o.date.slice(5, 7) - 1, 1);
 render();
-toast(clash ? `Saved, but it overlaps “${clash.title}”` : SYNC.db ? 'Date saved and shared' : DB.db ? 'Date saved' : 'Saved for this visit only');
+toast((clash ? `Schedule set, but it overlaps “${clash.title}”` : `Schedule set: “${o.title}” · ${when(o)}`) + (SYNC.db ? '' : ' (kept on this device)'));
 };
 }
 async function remove(id) {
@@ -943,7 +960,6 @@ const o = events.find(x => x.id === id);
 events = events.filter(x => x.id !== id); await DB.del(id); close(); render();
 toast('Date deleted', async () => { if (o) { await save(o); render(); toast('Date restored'); } });
 }
-
 function box(title, intro, text, readonly, onImport) {
 open(`<h2>${title}</h2><p style="color:var(--mut);margin:0 0 8px">${intro}</p><textarea id="js" rows="8" style="width:100%"${readonly ? ' readonly' : ''}>${esc(text)}</textarea><div class="foot"><button class="btn" id="cx">Close</button><button class="btn ${onImport ? '' : 'pri'}" id="cp">Copy</button>${onImport ? '<button class="btn pri" id="im">Import</button>' : ''}</div>`);
 $('#cx').onclick = close;

@@ -470,6 +470,15 @@ input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;displa
 .by{display:inline-grid;place-items:center;width:1.4em;height:1.4em;margin-right:5px;border-radius:50%;font-size:.78em;font-weight:600;line-height:1;background:rgba(255,255,255,.3)}
 .attrib{margin:-4px 0 12px;font-size:13px;color:var(--mut)}
 
+@media (max-width:700px){
+  /* Dot color = category, ring color = who set it (pink = her, violet = him) */
+  .pill[data-by=her]{box-shadow:0 0 0 1.5px #ff7db3}
+  .pill[data-by=him]{box-shadow:0 0 0 1.5px #a78bfa}
+  .cell{gap:4px}
+  .item .by{width:1.6em;height:1.6em;font-size:.8em}
+  .attrib{font-size:14px;line-height:1.4}
+}
+
 .pane:focus-visible{outline-offset:-6px}
 @media (max-width:700px){body::after{display:none}}
 </style>
@@ -601,7 +610,7 @@ const lily = () => THEME[role].art();
 const col = c => THEME[role].cat[c];
 const who = r => r === role ? 'You' : ((ACC.get()[r] || {}).name || (r === 'her' ? 'Girlfriend' : 'Boyfriend'));
 const setBy = e => { const r = e.cby || e.by; return r ? 'Set by ' + esc(who(r)) : ''; };
-const badge = e => { const r = e.cby || e.by; return r ? `<b class="by">${esc(((ACC.get()[r] || {}).name || (r === 'her' ? 'G' : 'B'))[0].toUpperCase())}</b>` : ''; };
+const badge = e => { const r = e.cby || e.by; return r ? `<span class="by">${esc(((ACC.get()[r] || {}).name || (r === 'her' ? 'G' : 'B'))[0].toUpperCase())}</span>` : ''; };
 const attrib = e => {
   const c = e.cby || e.by; if (!c) return '';
   const t = e.at ? new Date(e.at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
@@ -862,7 +871,7 @@ function renderCal() {
     const d = new Date(st); d.setDate(st.getDate() + i);
     const k = ymd(d), ev = by[k] || [];
     h += `<div class="cell ${d.getMonth() !== view.getMonth() ? 'out' : ''} ${k === ymd(new Date()) ? 'today' : ''} ${k === sel ? 'sel' : ''}" data-d="${k}" tabindex="0" role="button" aria-label="${nice(k)}"><span class="n">${d.getDate()}</span>`
-      + ev.slice(0, lim).map(e => `<button class="pill ${e.done ? 'done' : ''}" data-id="${e.id}" style="--c:${col(e.cat)}" title="${esc(e.title)}${e.start ? ' · ' + tm(e.start) : ''}">${badge(e)}${esc(e.title)}</button>`).join('')
+      + ev.slice(0, lim).map(e => `<button class="pill ${e.done ? 'done' : ''}" data-id="${e.id}" data-by="${e.cby || e.by}" style="--c:${col(e.cat)}" title="${esc(e.title)}${e.start ? ' · ' + tm(e.start) : ''}">${badge(e)}${esc(e.title)}</button>`).join('')
       + (ev.length > lim ? `<span class="more">+${ev.length - lim}</span>` : '') + '</div>';
   }
   $('#body').innerHTML = h + '</div>';
@@ -877,7 +886,7 @@ function renderSide() {
 function renderDay() {
   const L = list().filter(e => e.date === sel);
   $('#day').innerHTML = `<div class="dayhead"><h3 class="t">${nice(sel)}</h3><button class="btn pri" id="dayadd">+ Add</button></div>`
-    + (L.length ? L.map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}</b><small>${e.start ? tm(e.start) + (e.end ? ' – ' + tm(e.end) : '') : 'All day'}${e.place ? ' · ' + esc(e.place) : ''}${setBy(e) ? ' · ' + setBy(e) : ''}</small></button>`).join('') : '<div class="empty">Nothing planned for this day.</div>');
+    + (L.length ? L.map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${badge(e)}${esc(e.title)}</b><small>${e.start ? tm(e.start) + (e.end ? ' – ' + tm(e.end) : '') : 'All day'}${e.place ? ' · ' + esc(e.place) : ''}${setBy(e) ? ' · ' + setBy(e) : ''}</small></button>`).join('') : '<div class="empty">Nothing planned for this day.</div>');
 }
 const render = () => { if (role) { renderCal(); renderSide(); renderDay(); } };
 function buildChips() {

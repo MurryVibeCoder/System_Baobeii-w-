@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Lily &amp; Lotus">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B8%3C/text%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,400;1,500;1,600&family=Figtree:wght@400;500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.json">
 <style>
 :root{--sh:0 18px 50px -22px var(--dsh);--ease:cubic-bezier(.2,.9,.3,1.15)}
@@ -357,6 +357,118 @@ input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;displa
   #login .lt{font-size:19px;padding:7px 18px}
 }
 
+/* ===== Help ===== */
+.help{display:grid;gap:8px;max-height:62vh;max-height:62dvh;overflow:auto;margin:0 -6px;padding:2px 6px 4px}
+.help .lead{margin:0 0 2px;font-size:14px;color:var(--mut)}
+.help p{margin:0;color:var(--mut);font-size:14.5px;line-height:1.55}
+.help p+p{margin-top:8px}
+.help details{border:1px solid var(--line);border-radius:16px;background:var(--blush);overflow:hidden;transition:border-color .25s,box-shadow .25s}
+.help details[open]{border-color:var(--pink);box-shadow:0 12px 26px -18px var(--dsh)}
+.help summary{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:48px;padding:12px 16px;font-weight:600;color:var(--deep);cursor:pointer;list-style:none}
+.help summary::-webkit-details-marker{display:none}
+.help summary::after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .3s var(--ease);opacity:.7}
+.help details[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+.help details>div{display:grid;gap:10px;padding:0 16px 16px;animation:fade .3s}
+.help ol{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;gap:8px}
+.help ol li{counter-increment:s;position:relative;padding-left:34px;min-height:24px;font-size:14.5px;line-height:1.55;color:var(--mut)}
+.help ol li::before{content:counter(s);position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;line-height:1;background:var(--pink);color:var(--surf)}
+.help ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14.5px;color:var(--mut)}
+.help ul li::marker{color:var(--pink)}
+.help b{color:var(--ink);font-weight:600}
+.help .tip{padding:9px 12px;border-radius:12px;border-left:3px solid var(--pink);background:var(--surf);color:var(--ink);font-size:13.5px}
+
+/* Login: bottom link buttons */
+#lkbar{position:absolute;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:3;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:max-content;max-width:calc(100% - 28px)}
+#lkbar #lkimp,#lkbar #lkout{position:static;transform:none;min-height:40px;padding:8px 16px;border-radius:99px;background:rgba(20,10,30,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.14);color:#fff;opacity:.92;font-size:13px;text-decoration:none;max-width:100%;width:auto}
+
+/* ===== Login scenery and bold look ===== */
+.scene{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.scene svg{width:100%;height:100%;display:block;transition:transform 1.4s cubic-bezier(.2,.9,.2,1),filter .8s}
+.scene::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.2),transparent 30%,transparent 55%,rgba(0,0,0,.42))}
+.pane::before,.pane::after{display:none}
+.pane.open .scene svg{transform:scale(1.05)}
+.pane.shrunk .scene svg{filter:saturate(.75) brightness(.75)}
+@media (hover:hover){.pane:not(.open):not(.shrunk):hover .scene svg{transform:scale(1.04)}}
+
+.sc-gr{transform-box:fill-box;transform-origin:50% 100%;animation:gsway 4.5s ease-in-out infinite alternate}
+.sc-pt{animation:sc-drift linear infinite}
+.sc-tw{animation:sc-tw ease-in-out infinite alternate}
+.sc-ff{animation:sc-ff ease-in-out infinite;filter:drop-shadow(0 0 4px #ffd36b)}
+.sc-rp{transform-box:fill-box;transform-origin:center;animation:rp 3.6s ease-out infinite}
+@keyframes gsway{to{transform:skewX(2.5deg)}}
+@keyframes sc-drift{0%{opacity:0;transform:translate(0,-30px) rotate(0)}12%{opacity:.8}100%{opacity:0;transform:translate(var(--dx),640px) rotate(420deg)}}
+@keyframes sc-tw{from{opacity:.25}to{opacity:1}}
+@keyframes sc-ff{0%,100%{opacity:0;transform:translate(0,0)}50%{opacity:1;transform:translate(var(--dx),var(--dy))}}
+
+/* Bold type: white on the scenery, theme colors inside the open panel */
+.pane:not(.open) .box{color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.6)}
+.pane.her:not(.open) h2,.pane.him:not(.open) h2{color:#fff}
+.pane h2{font-size:clamp(46px,6vw,66px);font-style:italic;line-height:1;letter-spacing:-.01em}
+.pane .sub{font-size:21px;opacity:.95}
+.pane .tap{opacity:.9;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+.pane .lg .lily{width:170px;height:170px}
+.pane.open .box{background:color-mix(in srgb,var(--f) 86%,transparent);border:2px solid var(--a);border-radius:30px;box-shadow:0 40px 90px -30px #000,0 0 0 6px color-mix(in srgb,var(--a) 22%,transparent)}
+.pane form input:not([type=checkbox]){border-width:2px;font-weight:500}
+.go{min-height:54px;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 14px 30px -12px var(--a),inset 0 1px 0 rgba(255,255,255,.35)}
+@media (max-width:700px){.pane h2{font-size:36px}.pane .lg .lily{width:96px;height:96px}}
+
+/* ===== Canvas scenery ===== */
+.scene canvas.cv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 100%;display:block;transition:transform 1.4s cubic-bezier(.2,.9,.2,1),filter .8s}
+.pane.open .scene canvas.cv{transform:scale(1.05)}
+.pane.shrunk .scene canvas.cv{filter:saturate(.8) brightness(.8)}
+@media (hover:hover){.pane:not(.open):not(.shrunk):hover .scene canvas.cv{transform:scale(1.03)}}
+
+/* ===== Revision layer ===== */
+/* Pills: darker end of the gradient so white text stays readable */
+.pill{background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 80%,#000));font-size:12px;font-weight:500}
+/* Next up card: stronger text on the light gradient */
+.next small{opacity:1}
+.next>small,.next>h3{text-shadow:0 1px 10px rgba(0,0,0,.28)}
+/* Readability */
+.wk div{font-size:13px}
+/* Header: one Menu button on every screen size, with Reset set apart as a danger action */
+#prof,#hlp,#out,#bk,#lnkdev,#rst{display:none}
+#menu{display:inline-flex;align-items:center}
+.mi[data-go=rst]{margin-top:8px;border-color:#d6336c}
+/* Calendar cells: lift on hover without being clipped by the card edge */
+@media (hover:hover){.cell:hover{transform:translateY(-2px);box-shadow:var(--sh);border-color:var(--pink);z-index:2}}
+/* Entrance: no blur on an ancestor of backdrop-filter elements (flickers in Safari) */
+@keyframes appIn{from{opacity:0;transform:translateY(18px) scale(.985)}}
+
+/* ===== Login typography ===== */
+#login{--serif:"Cormorant Garamond",Georgia,serif;--sans:Jost,Figtree,system-ui,sans-serif}
+#login .lt{font:500 italic 23px var(--serif);letter-spacing:.03em}
+.pane h2{font:500 italic clamp(46px,6vw,68px)/1 var(--serif);letter-spacing:-.005em}
+.pane .sub{font:400 italic 22px var(--serif);letter-spacing:.01em}
+.pane .tap{font:500 11px var(--sans);letter-spacing:.28em}
+.pane form input:not([type=checkbox]){font-family:var(--sans);font-weight:400;letter-spacing:.02em}
+.pane form input::placeholder{letter-spacing:.04em;opacity:.6}
+.go{font:500 13px var(--sans);letter-spacing:.24em}
+.keep,.err,.eye,.lk,#lkimp,#lkout{font-family:var(--sans)}
+.lk,#lkimp,#lkout{letter-spacing:.05em}
+@media (max-width:700px){.pane h2{font-size:40px}#login .lt{font-size:20px}}
+
+.card.next{background:linear-gradient(135deg,var(--g1),var(--pink),var(--g2),var(--pink));background-size:300% 300%}
+
+/* ===== Login: soft vintage fade behind logo + text ===== */
+.pane:not(.open) .box::before{
+  content:"";position:absolute;z-index:-1;pointer-events:none;
+  inset:-70px -90px -50px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 -.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse closest-side,rgba(0,0,0,.5) 0,rgba(0,0,0,.42) 40%,rgba(0,0,0,.2) 68%,rgba(0,0,0,0) 100%);
+  -webkit-mask-image:radial-gradient(ellipse closest-side,#000 45%,transparent 100%);
+  mask-image:radial-gradient(ellipse closest-side,#000 45%,transparent 100%);
+  filter:blur(1px);
+  animation:vfade 7s ease-in-out infinite alternate;
+}
+@keyframes vfade{from{opacity:.85}to{opacity:1}}
+.pane.shrunk .box::before{opacity:.55;animation:none}
+@media (max-width:700px){.pane:not(.open) .box::before{inset:-40px -30px -30px}}
+
+.by{display:inline-grid;place-items:center;width:1.4em;height:1.4em;margin-right:5px;border-radius:50%;font-size:.78em;font-weight:600;line-height:1;background:rgba(255,255,255,.3)}
+.attrib{margin:-4px 0 12px;font-size:13px;color:var(--mut)}
+
 .pane:focus-visible{outline-offset:-6px}
 @media (max-width:700px){body::after{display:none}}
 </style>
@@ -422,13 +534,13 @@ function clean(o) {
   const id = s(o.id, 40).replace(/[^\w-]/g, ''), date = s(o.date, 10), title = s(o.title, 80).trim();
   if (!id || !title || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !CATS[o.cat]) return null;
   const t = v => /^\d{2}:\d{2}$/.test(v) ? v : '';
-  return { id, date, title, cat: o.cat, start: t(o.start), end: t(o.end), place: s(o.place, 80), notes: s(o.notes, 2000), done: o.done === true, by: o.by === 'her' || o.by === 'him' ? o.by : '', at: Number.isFinite(o.at) ? o.at : 0 };
+  return { id, date, title, cat: o.cat, start: t(o.start), end: t(o.end), place: s(o.place, 80), notes: s(o.notes, 2000), done: o.done === true, by: o.by === 'her' || o.by === 'him' ? o.by : '', cby: o.cby === 'her' || o.cby === 'him' ? o.cby : '', at: Number.isFinite(o.at) ? o.at : 0 };
 }
 const THEME = {
   her: {
     dark: 0, name: ['Lily Dates', 'Your schedule, in bloom'],
-    v: { bg: '#fff3f8', surf: '#fff', ink: '#4a1f33', mut: '#946781', pink: '#e8588f', deep: '#b02a63', blush: '#ffe4ef', line: '#f7cfe0', g1: '#ff8dbb', g2: '#d63a82', glow: '#ffe4ef', ovl: 'rgba(74,31,51,.45)', dsh: 'rgba(232,88,143,.4)' },
-    cat: { date: '#e8588f', school: '#9b5de5', other: '#b8749a' },
+    v: { bg: '#fff3f8', surf: '#fff', ink: '#4a1f33', mut: '#80546d', pink: '#e8588f', deep: '#b02a63', blush: '#ffe4ef', line: '#f7cfe0', g1: '#f2639c', g2: '#c92f75', glow: '#ffe4ef', ovl: 'rgba(74,31,51,.45)', dsh: 'rgba(232,88,143,.4)' },
+    cat: { date: '#d63a82', school: '#7a45d6', other: '#0e8a7a' },
     defs: '<radialGradient id="g-her" cx="50%" cy="88%" r="95%"><stop offset="0" stop-color="#fff8fb"/><stop offset=".55" stop-color="#ffc2da"/><stop offset="1" stop-color="#ee6a9f"/></radialGradient>',
     art() {
       let p = '';
@@ -438,8 +550,8 @@ const THEME = {
   },
   him: {
     dark: 1, name: ['Midnight Lotus', 'Your schedule, in still water'],
-    v: { bg: '#000', surf: '#0b0810', ink: '#f1e8ff', mut: '#a994cc', pink: '#a45cff', deep: '#c79bff', blush: '#150e24', line: '#33205a', g1: '#b58bff', g2: '#6a22c9', glow: 'rgba(164,92,255,.22)', ovl: 'rgba(0,0,0,.65)', dsh: 'rgba(164,92,255,.45)' },
-    cat: { date: '#a45cff', school: '#6f7bff', other: '#8b7aa8' },
+    v: { bg: '#000', surf: '#0b0810', ink: '#f1e8ff', mut: '#a994cc', pink: '#a45cff', deep: '#c79bff', blush: '#150e24', line: '#33205a', g1: '#9566f0', g2: '#6a22c9', glow: 'rgba(164,92,255,.22)', ovl: 'rgba(0,0,0,.65)', dsh: 'rgba(164,92,255,.45)' },
+    cat: { date: '#9055f5', school: '#3b7be8', other: '#c0701a' },
     defs: '<linearGradient id="g-b" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#3b138a"/><stop offset="1" stop-color="#9a5cf0"/></linearGradient>',
     art() {
       let p = '';
@@ -486,6 +598,14 @@ const enc = o => btoa(unescape(encodeURIComponent(JSON.stringify(o))));
 const dec = s => JSON.parse(decodeURIComponent(escape(atob(s.trim()))));
 const lily = () => THEME[role].art();
 const col = c => THEME[role].cat[c];
+const who = r => r === role ? 'You' : ((ACC.get()[r] || {}).name || (r === 'her' ? 'Girlfriend' : 'Boyfriend'));
+const setBy = e => { const r = e.cby || e.by; return r ? 'Set by ' + esc(who(r)) : ''; };
+const badge = e => { const r = e.cby || e.by; return r ? `<b class="by">${esc(((ACC.get()[r] || {}).name || (r === 'her' ? 'G' : 'B'))[0].toUpperCase())}</b>` : ''; };
+const attrib = e => {
+  const c = e.cby || e.by; if (!c) return '';
+  const t = e.at ? new Date(e.at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+  return esc('Set by ' + who(c) + (e.by && e.by !== c ? ' · last edited by ' + who(e.by) : '') + (t ? ' · updated ' + t : ''));
+};
 function toast(m, undo) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = m;
   if (undo) { const b = document.createElement('button'); b.type = 'button'; b.className = 'tact'; b.textContent = 'Undo'; b.onclick = () => { undo(); t.remove(); }; t.append(b); t.style.animationDelay = '0s,4.6s'; }
@@ -666,6 +786,43 @@ const IT = 210000;                                  // PBKDF2 rounds
 const bytes = s => new TextEncoder().encode(s);
 const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
 const rnd = n => hex(crypto.getRandomValues(new Uint8Array(n)));
+const b64 = u => btoa(String.fromCharCode(...u)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const unb64 = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+const h2b = h => Uint8Array.from(h.match(/../g), x => parseInt(x, 16));
+function packAcc(acc) {
+  const out = []; let mask = 0;
+  ['her', 'him'].forEach((r, i) => {
+    const a = acc[r]; if (!a || !a.rs) return;
+    mask |= 1 << i;
+    const n = bytes(a.name || '').slice(0, 72);
+    out.push(n.length, ...n, a.it >>> 24 & 255, a.it >>> 16 & 255, a.it >>> 8 & 255, a.it & 255, ...h2b(a.salt), ...h2b(a.h), ...h2b(a.rs), ...h2b(a.rh));
+  });
+  return 'v2.' + b64(Uint8Array.from([mask, ...out]));
+}
+function unpackAcc(s) {
+  const u = unb64(s.slice(3)), acc = {}; let p = 1;
+  ['her', 'him'].forEach((r, i) => {
+    if (!(u[0] >> i & 1)) return;
+    const n = u[p++], name = new TextDecoder().decode(u.subarray(p, p + n)); p += n;
+    const it = ((u[p] << 24) | (u[p + 1] << 16) | (u[p + 2] << 8) | u[p + 3]) >>> 0; p += 4;
+    const g = l => { const x = hex(u.subarray(p, p + l)); p += l; return x; };
+    acc[r] = { name, it, salt: g(16), h: g(32), rs: g(16), rh: g(32) };
+  });
+  return { acc };
+}
+async function fbDb() {
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  if (!firebase.auth().currentUser) await firebase.auth().signInAnonymously();
+  return firebase.firestore();
+}
+async function linkCode() {
+  try {
+    const db = await fbDb(), A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const c = Array.from(crypto.getRandomValues(new Uint8Array(8)), x => A[x % 32]).join('');
+    await db.doc('links/' + c).set({ blob: packAcc(ACC.get()), exp: Date.now() + 5 * 60e3 });
+    return c.slice(0, 4) + '-' + c.slice(4);
+  } catch (e) { return packAcc(ACC.get()); }   // offline: fall back to the long code
+}
 async function kdf(pw, salt, it = IT) {
   const k = await crypto.subtle.importKey('raw', bytes(pw), 'PBKDF2', false, ['deriveBits']);
   return hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: bytes(salt), iterations: it }, k, 256));
@@ -690,7 +847,7 @@ const tooMany = () => `Too many tries. Wait ${Math.ceil(waitMs() / 1000)}s.`;
 let events = [], cat = 'all', role = null, sel = ymd(new Date()), animNext = true;
 let view = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 const list = () => events.filter(e => cat === 'all' || e.cat === cat).sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
-async function save(o) { o.by = role; o.at = Date.now(); const i = events.findIndex(x => x.id === o.id); i < 0 ? events.push(o) : events[i] = o; await DB.put(o); }
+async function save(o) { const old = events.find(x => x.id === o.id); o.cby = (old && (old.cby || old.by)) || role; o.by = role; o.at = Date.now(); const i = events.findIndex(x => x.id === o.id); i < 0 ? events.push(o) : events[i] = o; await DB.put(o); }
 
 /* ---------- Rendering ---------- */
 function renderCal() {
@@ -698,13 +855,14 @@ function renderCal() {
   $('#body').classList.toggle('anim', animNext); $('#up').classList.toggle('anim', animNext); animNext = false;
   const L = list(), st = new Date(view); st.setDate(1 - view.getDay());
   const by = {}; L.forEach(e => (by[e.date] = by[e.date] || []).push(e));
+  const lim = isMobile() ? 4 : 2;
   let h = '<div class="wk">' + ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `<div>${d}</div>`).join('') + '</div><div class="grid">';
   for (let i = 0; i < 42; i++) {
     const d = new Date(st); d.setDate(st.getDate() + i);
     const k = ymd(d), ev = by[k] || [];
     h += `<div class="cell ${d.getMonth() !== view.getMonth() ? 'out' : ''} ${k === ymd(new Date()) ? 'today' : ''} ${k === sel ? 'sel' : ''}" data-d="${k}" tabindex="0" role="button" aria-label="${nice(k)}"><span class="n">${d.getDate()}</span>`
-      + ev.slice(0, 2).map(e => `<button class="pill ${e.done ? 'done' : ''}" data-id="${e.id}" style="--c:${col(e.cat)}" title="${esc(e.title)}">${tm(e.start).replace(' ', '').toLowerCase()} ${esc(e.title)}</button>`).join('')
-      + (ev.length > 2 ? `<span class="more">+${ev.length - 2} more</span>` : '') + '</div>';
+      + ev.slice(0, lim).map(e => `<button class="pill ${e.done ? 'done' : ''}" data-id="${e.id}" style="--c:${col(e.cat)}" title="${esc(e.title)}${e.start ? ' · ' + tm(e.start) : ''}">${badge(e)}${esc(e.title)}</button>`).join('')
+      + (ev.length > lim ? `<span class="more">+${ev.length - lim}</span>` : '') + '</div>';
   }
   $('#body').innerHTML = h + '</div>';
 }
@@ -712,13 +870,13 @@ function renderSide() {
   const now = new Date(), nk = ymd(now) + pad(now.getHours()) + ':' + pad(now.getMinutes());
   const up = events.filter(e => !e.done && (e.date + (e.start || '23:59')) >= nk).sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
   const n = up[0];
-  $('#next').innerHTML = n ? `<small>Next up</small><h3>${esc(n.title)}</h3><small>${when(n)}${n.place ? '<br>' + esc(n.place) : ''}</small>` : '<small>Next up</small><h3>Nothing planned</h3><small>Add a date to see it here.</small>';
-  $('#up').innerHTML = up.length ? up.slice(0, 5).map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}</b><small>${when(e)}</small></button>`).join('') : '<div class="empty">Nothing on the horizon.</div>';
+  $('#next').innerHTML = n ? `<small>Next up</small><h3>${esc(n.title)}</h3><small>${when(n)}${n.place ? '<br>' + esc(n.place) : ''}${setBy(n) ? '<br>' + setBy(n) : ''}</small>` : '<small>Next up</small><h3>Nothing planned</h3><small>Add a date to see it here.</small>';
+  $('#up').innerHTML = up.length ? up.slice(0, 5).map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}<b>${esc(e.title)}</b><small>${when(e)}${setBy(e) ? ' · ' + setBy(e) : ''}</small></button>`).join('') : '<div class="empty">Nothing on the horizon.</div>'
 }
 function renderDay() {
   const L = list().filter(e => e.date === sel);
   $('#day').innerHTML = `<div class="dayhead"><h3 class="t">${nice(sel)}</h3><button class="btn pri" id="dayadd">+ Add</button></div>`
-    + (L.length ? L.map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}</b><small>${e.start ? tm(e.start) + (e.end ? ' – ' + tm(e.end) : '') : 'All day'}${e.place ? ' · ' + esc(e.place) : ''}</small></button>`).join('') : '<div class="empty">Nothing planned for this day.</div>');
+    + (L.length ? L.map(e => `<button class="item" data-id="${e.id}" style="--c:${col(e.cat)}"><b>${esc(e.title)}</b><small>${e.start ? tm(e.start) + (e.end ? ' – ' + tm(e.end) : '') : 'All day'}${e.place ? ' · ' + esc(e.place) : ''}${setBy(e) ? ' · ' + setBy(e) : ''}</small></button>`).join('') : '<div class="empty">Nothing planned for this day.</div>');
 }
 const render = () => { if (role) { renderCal(); renderSide(); renderDay(); } };
 function buildChips() {
@@ -742,7 +900,7 @@ function close() {
 }
 function form(id, date) {
   const e = events.find(x => x.id === id) || { date: date || sel, start: '18:00', end: '20:00', cat: 'date', title: '', place: '', notes: '' };
-  open(`<h2>${id ? 'Edit date' : 'New date'}</h2><form id="f" class="f"><label class="w">Title<input name="title" required maxlength="80" value="${esc(e.title)}" placeholder="Dinner under the lanterns"></label>
+  open(`<h2>${id ? 'Edit date' : 'New date'}</h2>${id && attrib(e) ? `<p class="attrib">${attrib(e)}</p>` : ''}<form id="f" class="f"><label class="w">Title<input name="title" required maxlength="80" value="${esc(e.title)}" placeholder="Dinner under the lanterns"></label>
 <label>Date<input type="date" name="date" required value="${e.date}"></label><label>Category<select name="cat">${Object.entries(CATS).map(([k, v]) => `<option value="${k}" ${k === e.cat ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
 <label>Starts<input type="time" name="start" value="${e.start || ''}"></label><label>Ends<input type="time" name="end" value="${e.end || ''}"></label>
 <label class="w">Place<input name="place" maxlength="80" value="${esc(e.place)}"></label><label class="w">Notes<textarea name="notes" rows="3">${esc(e.notes)}</textarea></label>
@@ -801,7 +959,7 @@ $('#bk').onclick = () => box('Backup', 'Copy this text to keep a backup, or past
 
 $('#lnkdev').onclick = async () => {
   if (!await confirmPass('Link device', 'Enter your passcode to create a link code.')) return;
-  box('Link device', 'Copy this code, then on your other device choose “Already have an account on another device?” and paste it. It copies your sign-in only: dates sync on their own. Treat it like a password, and don’t share it.', enc({ acc: { [role]: ACC.get()[role] }, events }), true);
+  box('Link device', 'Copy this code, then on your other device choose “Already have an account on another device?” and paste it. It copies your sign-in only: dates sync on their own. Treat it like a password, and don’t share it.', packAcc(ACC.get()));
 };
 
 $('#rst').onclick = async () => {
@@ -846,13 +1004,389 @@ function applyTheme(r) {
   $('#tag').textContent = T.name[1];
   buildChips(); render();
 }
+/* ---------- Login scenery: realistic canvas scenes (wind, springs, verlet ropes, particles) ---------- */
+const SW = 800, SH = 800, SM = 60, W2 = SW + SM * 2;
+const R = (a, b) => a + Math.random() * (b - a);
+const cl = (v, a, b) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const hsh = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+const nz = x => { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f); return lerp(hsh(i), hsh(i + 1), u) * 2 - 1; };
+const ridge = (seed, x) => { let a = 1, f = 1, s = 0, n = 0; for (let i = 0; i < 4; i++) { s += a * nz(x * f + seed * 17.3); n += a; a *= .5; f *= 2.1; } return s / n; };
+/* Wind travels across the scene as gusts (position and time both matter) */
+const wind = (x, t, k = 1) => k * (.3 + .7 * nz(t * .32 - x * .0015) + .35 * nz(t * 1.1 - x * .004 + 40));
+const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const SCX = mk(2, 2).getContext('2d');
+const lin = (x0, y0, x1, y1, st) => { const q = SCX.createLinearGradient(x0, y0, x1, y1); st.forEach(([o, c]) => q.addColorStop(o, c)); return q; };
+const rad = (x, y, r0, r1, st) => { const q = SCX.createRadialGradient(x, y, r0, x, y, r1); st.forEach(([o, c]) => q.addColorStop(o, c)); return q; };
+function glow(r, rgb) { const c = mk(r * 2, r * 2), g = c.getContext('2d'); g.fillStyle = rad(r, r, 0, r, [[0, `rgba(${rgb},1)`], [.3, `rgba(${rgb},.35)`], [1, `rgba(${rgb},0)`]]); g.fillRect(0, 0, r * 2, r * 2); return c; }
+function softLayer(w, h, rgb, shade, nc, per, a, rx, ry, rmin, rmax) {
+  const c = mk(w, h), g = c.getContext('2d');
+  const blob = (x, y, r, col) => { for (const dx of [-w, 0, w]) { g.fillStyle = rad(x + dx, y, 0, r, [[0, `rgba(${col},${a})`], [1, `rgba(${col},0)`]]); g.fillRect(x + dx - r, y - r, r * 2, r * 2); } };
+  for (let k = 0; k < nc; k++) { const cx = R(0, w), cy = R(h * .3, h * .7); for (let i = 0; i < per; i++) { const x = cx + R(-rx, rx), y = cy + R(-ry, ry), r = R(rmin, rmax); blob(x, y + r * .22, r, shade); blob(x, y, r, rgb); } }
+  return c;
+}
+function tile(g, img, speed, t, y, al, sx) { const w = img.width; let x = -((t * speed) % w); if (x > 0) x -= w; g.globalAlpha = al; for (let k = -1; k <= 1; k++) g.drawImage(img, x + sx + k * w, y); g.globalAlpha = 1; }
+function ridgeFill(g, bot, seed, base, amp, c1, c2, sc = .0045, rim) {
+  const pts = []; for (let x = -SM; x <= SW + SM; x += 6) pts.push([x, base + amp * ridge(seed, x * sc)]);
+  g.beginPath(); g.moveTo(-SM, bot); pts.forEach(p => g.lineTo(p[0], p[1])); g.lineTo(SW + SM, bot); g.closePath();
+  g.fillStyle = lin(0, base - amp, 0, base + amp * 2.2, [[0, c1], [1, c2]]); g.fill();
+  if (rim) { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.strokeStyle = rim; g.lineWidth = 1.4; g.stroke(); }
+  return pts;
+}
+let _gt = null;
+const grainTile = () => { if (_gt) return _gt; _gt = mk(128, 128); const g = _gt.getContext('2d'), d = g.createImageData(128, 128); for (let i = 0; i < d.data.length; i += 4) { d.data[i] = d.data[i + 1] = d.data[i + 2] = Math.random() * 255; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); return _gt; };
+function post(g, S, fr, grade, vig) {
+  g.globalCompositeOperation = 'soft-light'; g.globalAlpha = 1; g.fillStyle = grade; g.fillRect(0, 0, SW, SH);
+  g.globalCompositeOperation = 'source-over'; g.fillStyle = vig; g.fillRect(0, 0, SW, SH);
+  if (fr % 3 === 0) { S.ox = R(0, 128); S.oy = R(0, 128); }
+  if (!S.pat) { S.pat = g.createPattern(grainTile(), 'repeat'); S.ox = S.oy = 0; }
+  g.save(); g.globalCompositeOperation = 'overlay'; g.globalAlpha = .09; g.translate(-S.ox, -S.oy); g.fillStyle = S.pat; g.fillRect(0, 0, SW + 128, SH + 128); g.restore();
+  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+}
 
+/* Grass and reeds: each blade is a damped spring pushed by wind and by the pointer */
+function mkBlade(x, y, h, w, k, c, rim, head) { return { kind: 'b', x, y, h, w, k, c, rim, head, th: 0, om: 0, ph: R(0, 6.28), z: 0 }; }
+function stepBlade(b, t, dt, P, wk) {
+  const wv = wind(b.x, t, wk), tgt = cl(wv * .42, -.6, .85) + .05 * Math.sin(t * 2.7 + b.ph) * (.4 + Math.abs(wv));
+  b.om += (b.k * (tgt - b.th) - 2 * Math.sqrt(b.k) * .22 * b.om) * dt;
+  if (P.in) { const dx = b.x - P.x, dy = (b.y - b.h * .4) - P.y, d2 = dx * dx + dy * dy; if (d2 < 6400) b.om += cl(P.vx * .0011, -4, 4) * (1 - Math.sqrt(d2) / 80) * (70 / (b.h + 30)); }
+  b.th = cl(b.th + b.om * dt, -1.15, 1.15);
+}
+function drawBlade(g, b, sx) {
+  const x0 = b.x + sx, y0 = b.y, tx = x0 + b.th * b.h * .85, ty = y0 - b.h * (1 - Math.abs(b.th) * .22), cx = x0 + b.th * b.h * .16, cy = y0 - b.h * .58;
+  g.fillStyle = b.c; g.beginPath(); g.moveTo(x0 - b.w / 2, y0); g.quadraticCurveTo(cx - b.w * .3, cy, tx, ty); g.quadraticCurveTo(cx + b.w * .4, cy, x0 + b.w / 2, y0); g.fill();
+  if (b.rim) { g.strokeStyle = b.rim; g.lineWidth = Math.max(.7, b.w * .22); g.beginPath(); g.moveTo(x0 + b.w * .2, y0 - b.h * .08); g.quadraticCurveTo(cx + b.w * .15, cy, tx, ty); g.stroke(); }
+  if (b.head) {
+    const u = .8, v = 1 - u, mx = v * v * x0 + 2 * v * u * cx + u * u * tx, my = v * v * y0 + 2 * v * u * cy + u * u * ty, an = Math.atan2(2 * v * (cy - y0) + 2 * u * (ty - cy), 2 * v * (cx - x0) + 2 * u * (tx - cx));
+    g.fillStyle = '#150a14'; g.beginPath(); g.ellipse(mx, my, b.head / 2, b.head / 6.5, an, 0, 7); g.fill();
+    if (b.rim) { g.strokeStyle = b.rim; g.lineWidth = 1; g.stroke(); }
+  }
+}
+
+const BUILD = {};
+const SCENE = {
+  her: () => '<canvas class="cv" data-s="her" width="800" height="800"></canvas>',
+  him: () => '<canvas class="cv" data-s="him" width="800" height="800"></canvas>'
+};
+
+/* ===== Her: lily garden at golden hour ===== */
+function mkStem(x, y, z) {
+  const n = 6, len = lerp(80, 330, z), seg = len / (n - 1), lean = R(-.12, .12);
+  return { kind: 's', x, y, z, n, seg, lean, sc: lerp(.7, 1.3, z), hs: lerp(30, 108, z), ph: R(0, 6.28), tilt: R(-.15, .15), w0: lerp(2, 6.5, z), leaf: lerp(26, 90, z),
+    p: Array.from({ length: n }, (_, j) => { const px = x + lean * j * seg * (j / (n - 1)), py = y - j * seg; return { x: px, y: py, px, py }; }) };
+}
+/* Verlet rope: inertia + wind + shape-matching spring + fixed segment length */
+function stepStem(s, t, dt, P) {
+  const k = dt * 60, p = s.p, n = p.length, d = Math.pow(.972, k);
+  for (let i = 1; i < n; i++) {
+    const q = p[i], f = i / (n - 1), kk = (.016 + .03 * (1 - f)) * k, vx = (q.x - q.px) * d, vy = (q.y - q.py) * d;
+    q.px = q.x; q.py = q.y;
+    q.x += vx + wind(q.x, t) * .75 * f * s.sc * k + ((s.x + s.lean * i * s.seg * f) - q.x) * kk;
+    q.y += vy + ((s.y - i * s.seg) - q.y) * kk;
+    if (P.in) { const dx = q.x - P.x, dy = q.y - P.y, d2 = dx * dx + dy * dy; if (d2 < 9025) q.x += cl(P.vx * .0008, -3.5, 3.5) * (1 - Math.sqrt(d2) / 95) * f * k; }
+  }
+  for (let it = 0; it < 4; it++) for (let i = 1; i < n; i++) {
+    const a = p[i - 1], b = p[i], dx = b.x - a.x, dy = b.y - a.y, dd = Math.hypot(dx, dy) || 1, df = (dd - s.seg) / dd;
+    if (i === 1) { b.x -= dx * df; b.y -= dy * df; } else { a.x += dx * df * .5; a.y += dy * df * .5; b.x -= dx * df * .5; b.y -= dy * df * .5; }
+  }
+}
+
+BUILD.her = () => {
+  const HZ = 440, SX = 520, SY = HZ - 20, gy = z => HZ + 64 + z * (SH - HZ - 52);
+  /* Static layers, painted once */
+  const sky = mk(W2, HZ + 60), sg = sky.getContext('2d'); sg.translate(SM, 0);
+  sg.fillStyle = lin(0, 0, 0, HZ + 60, [[0, '#4b2a73'], [.3, '#a8467f'], [.62, '#ff8f7a'], [.9, '#ffd49a'], [1, '#ffe7b8']]); sg.fillRect(-SM, 0, W2, HZ + 60);
+  sg.globalCompositeOperation = 'lighter'; sg.globalAlpha = .85; sg.drawImage(glow(420, '255,196,130'), SX - 420, SY - 420);
+  sg.globalAlpha = .6; sg.drawImage(glow(150, '255,240,200'), SX - 150, SY - 150);
+  sg.globalCompositeOperation = 'source-over'; sg.globalAlpha = 1;
+  sg.fillStyle = rad(SX, SY, 0, 42, [[0, '#fffef2'], [.75, '#fff3c6'], [1, 'rgba(255,240,190,0)']]); sg.beginPath(); sg.arc(SX, SY, 42, 0, 7); sg.fill();
+  const land = mk(W2, SH), lg = land.getContext('2d'); lg.translate(SM, 0);
+  ridgeFill(lg, SH, 1, HZ - 12, 38, '#d98aa0', '#b0607f', .0045, 'rgba(255,225,190,.45)');
+  ridgeFill(lg, SH, 2, HZ + 6, 46, '#a95b80', '#7d4569');
+  const p3 = ridgeFill(lg, SH, 3, HZ + 26, 40, '#6e4a6a', '#3f3a52', .006);
+  lg.fillStyle = '#3d2f4f'; p3.forEach(([x, y], i) => { if (i % 2) { lg.beginPath(); lg.ellipse(x, y - 4, R(5, 10), R(10, 20), 0, 0, 7); lg.fill(); } });
+  ridgeFill(lg, SH, 4, HZ + 62, 16, '#b2a04a', '#2f6a3b', .01);
+  lg.fillStyle = lin(0, HZ + 90, 0, SH, [[0, 'rgba(8,24,14,0)'], [1, 'rgba(6,20,12,.7)']]); lg.fillRect(-SM, HZ + 90, W2, SH);
+  const cA = softLayer(1400, 220, '255,178,170', '120,52,120', 6, 24, .2, 130, 14, 24, 64), cB = softLayer(1400, 150, '255,214,176', '150,70,110', 4, 18, .17, 110, 10, 18, 48);
+  const GS = glow(330, '255,190,120'), GW = glow(32, '255,224,170');
+  const LB = lin(0, 0, 0, -70, [[0, '#d9b86a'], [.3, '#f2a9c4'], [1, '#c93a7a']]), LF = lin(0, 0, 0, -70, [[0, '#fff0b0'], [.22, '#ffe2ec'], [.7, '#ff9ec4'], [1, '#e8478c']]);
+  const SP = Array.from({ length: 16 }, (_, i) => [hsh(i * 3.1) * 24 - 12, -hsh(i * 7.7) * 26 - 4]);
+  const GRADE = lin(0, 0, 0, SH, [[0, 'rgba(130,60,170,.5)'], [.5, 'rgba(255,140,110,0)'], [1, 'rgba(255,170,80,.4)']]), VIG = rad(SW / 2, SH * .55, SW * .3, SW * .85, [[0, 'rgba(0,0,0,0)'], [1, 'rgba(40,8,30,.5)']]);
+  const S = {};
+
+  const lilyShape = g => {
+    const pt = (a, L, W) => { g.save(); g.rotate(a * Math.PI / 180); g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(-W, -L * .2, -W * 1.2, -L * .8, 0, -L); g.bezierCurveTo(W * 1.2, -L * .8, W, -L * .2, 0, 0); g.fill(); g.stroke(); g.restore(); };
+    g.lineWidth = 1; g.strokeStyle = 'rgba(255,240,205,.5)';
+    g.fillStyle = LB; [-38, 0, 38].forEach(a => pt(a, 64, 15));
+    g.fillStyle = LF; [-80, 80].forEach(a => pt(a, 60, 17)); [-150, 150].forEach(a => pt(a, 48, 15)); [-14, 14].forEach(a => pt(a, 68, 16));
+    g.fillStyle = 'rgba(150,30,80,.5)'; SP.forEach(([x, y]) => { g.beginPath(); g.arc(x * .6, y * .55, 1.1, 0, 7); g.fill(); });
+    g.lineCap = 'round';
+    for (let i = -2; i <= 2; i++) { const a = i * .3, x = Math.sin(a) * 26, y = -Math.cos(a) * 30 - 6; g.strokeStyle = '#e3cf8c'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(0, -4); g.lineTo(x, y); g.stroke(); g.fillStyle = '#a8461a'; g.save(); g.translate(x, y); g.rotate(a); g.beginPath(); g.ellipse(0, 0, 2.4, 6, 0, 0, 7); g.fill(); g.restore(); }
+    g.strokeStyle = '#9ccf55'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(0, -4); g.quadraticCurveTo(6, -24, 5, -44); g.stroke();
+  };
+  const drawStem = (g, s, t) => {
+    const p = s.p, n = p.length; g.lineCap = 'round'; g.lineJoin = 'round';
+    for (let i = 1; i < n; i++) { g.strokeStyle = '#2a6a3d'; g.lineWidth = lerp(s.w0, s.w0 * .55, i / n); g.beginPath(); g.moveTo(p[i - 1].x, p[i - 1].y); g.lineTo(p[i].x, p[i].y); g.stroke(); }
+    g.strokeStyle = 'rgba(210,255,170,.28)'; g.lineWidth = Math.max(.8, s.w0 * .3); g.beginPath(); p.forEach((q, i) => i ? g.lineTo(q.x + s.w0 * .22, q.y) : g.moveTo(q.x + s.w0 * .22, q.y)); g.stroke();
+    [[1, -1], [2, 1], [3, -1]].forEach(([i, sd]) => {
+      const a0 = p[i - 1], b = p[i + 1], an = Math.atan2(b.y - a0.y, b.x - a0.x) + sd * 1.0 + Math.sin(t * 1.4 + s.ph + i) * .06, L = s.leaf * (i === 2 ? 1 : .8);
+      g.save(); g.translate(p[i].x, p[i].y); g.rotate(an); g.fillStyle = '#2e7446'; g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(L * .5, -L * .22, L, 0); g.quadraticCurveTo(L * .5, L * .16, 0, 0); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,.15)'; g.lineWidth = 1; g.beginPath(); g.moveTo(0, 0); g.lineTo(L * .9, 0); g.stroke(); g.restore();
+    });
+    const hd = p[n - 1], pv = p[n - 2], an = Math.atan2(hd.x - pv.x, -(hd.y - pv.y)), sc = s.hs / 70;
+    g.save(); g.translate(hd.x, hd.y); g.rotate(an + s.tilt + .06 * Math.sin(t * .9 + s.ph)); g.scale(sc, sc); lilyShape(g); g.restore();
+  };
+
+  /* Scene objects, drawn far to near */
+  const items = [];
+  for (let i = 0; i < 560; i++) {
+    const z = Math.pow(Math.random(), 1.25), l = Math.random();
+    const b = mkBlade(R(-20, SW + 20), gy(z), lerp(12, 150, z * z * .8 + z * .2) * R(.7, 1.25), lerp(1.6, 8, z), lerp(70, 22, z) * R(.8, 1.2),
+      `rgb(${(lerp(150, 28, z) + l * 22) | 0},${(lerp(150, 92, z) + l * 30) | 0},${lerp(62, 52, z) | 0})`, z > .3 ? 'rgba(255,214,150,.3)' : '', 0);
+    b.z = z; items.push(b);
+  }
+  for (let i = 0; i < 9; i++) { const z = Math.min(1, lerp(.1, .95, i / 8) * R(.92, 1.05)); items.push(mkStem(50 + ((i * .618 + .13) % 1) * 700, gy(z), z)); }
+  items.sort((a, b) => a.y - b.y);
+
+  /* Falling petals: gravity toward terminal speed, wind drag, flutter, tumbling, landing */
+  const newPetal = init => { const z = R(0, 1), ly = HZ + 70 + z * (SH - HZ - 70); return { x: R(-40, SW + 40), y: init ? R(-50, ly) : R(-60, -10), vx: 0, vy: R(20, 40), rot: R(0, 6.28), vr: R(-2, 2), fl: R(0, 6.28), fv: R(2, 5), ph: R(0, 6.28), sz: lerp(4, 11, z), z, ly, vt: R(28, 52), life: 1, down: false }; };
+  const pet = Array.from({ length: 24 }, () => newPetal(true));
+  const mo = Array.from({ length: 26 }, () => ({ x: R(0, SW), y: R(120, SH), r: R(2, 16), a: R(.15, .5), ph: R(0, 6.28) }));
+
+  const frame = (g, t, dt, P, par, fr) => {
+    g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+    g.drawImage(sky, -SM - par * 4, 0);
+    tile(g, cA, 5, t, 20, .9, -par * 6); tile(g, cB, 11, t, 150, .8, -par * 7);
+    g.globalCompositeOperation = 'lighter';
+    for (let k = 0; k < 7; k++) {
+      const a = -Math.PI + (k + 1) * Math.PI / 8 + .05 * Math.sin(t * .25 + k * 1.7), wd = 30 + 22 * ((k * 5) % 3), al = .1 + .06 * Math.sin(t * .4 + k * 2.1);
+      g.save(); g.translate(SX - par * 4, SY); g.rotate(a); g.fillStyle = lin(0, 0, 900, 0, [[0, `rgba(255,214,150,${al})`], [1, 'rgba(255,214,150,0)']]);
+      g.beginPath(); g.moveTo(0, 0); g.lineTo(900, -wd); g.lineTo(900, wd); g.fill(); g.restore();
+    }
+    g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+    g.drawImage(land, -SM - par * 10, 0);
+    g.globalCompositeOperation = 'lighter'; g.globalAlpha = .3; g.drawImage(GS, SX - 330 - par * 6, SY - 290); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    for (const it of items) {
+      if (it.kind === 'b') { stepBlade(it, t, dt, P, 1); drawBlade(g, it, -par * 26 * it.z); }
+      else { stepStem(it, t, dt, P); g.save(); g.translate(-par * 26 * it.z, 0); drawStem(g, it, t); g.restore(); }
+    }
+    for (const p of pet) {
+      if (!p.down) {
+        p.vx += (wind(p.x, t) * 55 - p.vx) * 1.1 * dt + Math.sin(p.ph) * 40 * dt; p.vy += (p.vt - p.vy) * 1.6 * dt;
+        p.ph += dt * 3.2; p.fl += p.fv * dt; p.rot += (p.vr + p.vx * .01) * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+        if (p.y >= p.ly) { p.down = true; p.vx = p.vy = 0; }
+      } else { p.life -= dt * .22; if (p.life <= 0) Object.assign(p, newPetal(false)); }
+      g.save(); g.translate(p.x - par * 22 * p.z, p.y); g.rotate(p.rot); g.scale(1, p.down ? .4 : .25 + .75 * Math.abs(Math.cos(p.fl)));
+      g.globalAlpha = (p.down ? p.life : 1) * .92; g.fillStyle = `hsl(338,88%,${70 + 14 * Math.cos(p.fl)}%)`;
+      g.beginPath(); g.ellipse(0, 0, p.sz * .55, p.sz, 0, 0, 7); g.fill(); g.restore();
+    }
+    g.globalAlpha = 1; g.globalCompositeOperation = 'lighter';
+    for (const m of mo) {
+      m.x += (wind(m.x, t) * 28 + Math.sin(t * .7 + m.ph) * 8) * dt; m.y += (Math.sin(t * .5 + m.ph * 1.3) * 6 - 3) * dt;
+      if (m.x > SW + 30) m.x = -30; if (m.x < -30) m.x = SW + 30; if (m.y < 80) m.y = SH;
+      g.globalAlpha = m.a * (.6 + .4 * Math.sin(t * 1.3 + m.ph)); g.drawImage(GW, m.x - m.r, m.y - m.r, m.r * 2, m.r * 2);
+    }
+    [[.55, 40, .07], [.9, 70, .05], [1.35, 28, .08]].forEach(([f, r, al]) => { g.globalAlpha = al; g.drawImage(GS, SX + (400 - SX) * f - r, SY + (330 - SY) * f - r, r * 2, r * 2); });
+    g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    post(g, S, fr, GRADE, VIG);
+  };
+  const poke = (x, y) => { for (let i = 0; i < 14; i++) { const p = pet[(Math.random() * pet.length) | 0], n = newPetal(false); n.x = x + R(-10, 10); n.y = y + R(-10, 10); n.vx = R(-120, 120); n.vy = R(-170, -40); n.ly = Math.max(n.ly, y + R(30, 200)); Object.assign(p, n); } };
+  return { frame, poke };
+};
+
+/* ===== Him: midnight lotus pond ===== */
+BUILD.him = () => {
+  const HZ = 430, MX = 560, MY = 150;
+  const sky = mk(W2, HZ), sg = sky.getContext('2d'); sg.translate(SM, 0);
+  sg.fillStyle = lin(0, 0, 0, HZ, [[0, '#02010a'], [.5, '#0d0a2c'], [.85, '#26165a'], [1, '#463088']]); sg.fillRect(-SM, 0, W2, HZ);
+  const GM = glow(128, '170,150,255');
+  sg.globalCompositeOperation = 'lighter'; sg.globalAlpha = .07;
+  for (let i = 0; i < 16; i++) { const u = i / 15, r = R(70, 130); sg.drawImage(GM, lerp(-60, 860, u) - r, lerp(340, 40, u) + R(-20, 20) - r, r * 2, r * 2); }
+  sg.globalAlpha = 1;
+  for (let i = 0; i < 2300; i++) {
+    const u = Math.random(), off = (Math.random() + Math.random() + Math.random() - 1.5) * 150 * (.6 + .4 * Math.abs(nz(u * 4))), bx = lerp(-60, 860, u) + .31 * off, by = lerp(340, 40, u) + .95 * off;
+    sg.fillStyle = `rgba(228,218,255,${R(.05, .55) * Math.max(0, 1 - Math.abs(off) / 230)})`; const s = R(.4, 1.3); sg.fillRect(bx, by, s, s);
+  }
+  sg.globalAlpha = .75; sg.drawImage(glow(330, '150,130,255'), MX - 330, MY - 330); sg.globalAlpha = .5; sg.drawImage(glow(120, '230,220,255'), MX - 120, MY - 120);
+  sg.globalCompositeOperation = 'source-over'; sg.globalAlpha = 1;
+  sg.fillStyle = rad(MX, MY, 4, 46, [[0, '#fffef8'], [.7, '#ece6fa'], [1, '#bcb2dc']]); sg.beginPath(); sg.arc(MX, MY, 46, 0, 7); sg.fill();
+  sg.save(); sg.beginPath(); sg.arc(MX, MY, 46, 0, 7); sg.clip();
+  [[-14, -10, 10], [12, 8, 13], [-4, 20, 7], [20, -18, 6], [-24, 12, 6], [2, -26, 5]].forEach(([x, y, r]) => {
+    sg.fillStyle = 'rgba(150,140,190,.32)'; sg.beginPath(); sg.arc(MX + x, MY + y, r, 0, 7); sg.fill();
+    sg.strokeStyle = 'rgba(255,255,255,.25)'; sg.lineWidth = 1; sg.beginPath(); sg.arc(MX + x - 1, MY + y - 1, r, 3.6, 5.6); sg.stroke();
+  });
+  sg.restore();
+  ridgeFill(sg, HZ, 5, HZ - 90, 70, '#2c1c62', '#1a1046', .005, 'rgba(190,175,255,.22)');
+  sg.fillStyle = lin(0, HZ - 140, 0, HZ, [[0, 'rgba(110,80,200,0)'], [1, 'rgba(110,80,200,.38)']]); sg.fillRect(-SM, HZ - 140, W2, 140);
+  ridgeFill(sg, HZ, 6, HZ - 40, 50, '#190d40', '#0f0828', .006);
+  const pn = ridgeFill(sg, HZ, 7, HZ - 6, 22, '#080418', '#060312', .012);
+  sg.fillStyle = '#05020f'; pn.forEach(([x, y]) => { const h = R(12, 34); sg.beginPath(); sg.moveTo(x - 5, y + 6); sg.lineTo(x, y - h); sg.lineTo(x + 5, y + 6); sg.fill(); });
+  const skyF = mk(W2, HZ), fg = skyF.getContext('2d'); fg.translate(0, HZ); fg.scale(1, -1); fg.drawImage(sky, 0, 0);
+
+  const fogA = softLayer(1200, 150, '150,130,230', '60,40,120', 5, 18, .1, 160, 14, 30, 80), fogB = softLayer(1200, 130, '170,150,240', '70,50,130', 4, 16, .08, 150, 12, 26, 70);
+  const GSt = glow(16, '255,255,255'), GMc = glow(100, '175,155,255'), GL = glow(64, '150,110,255'), GF = glow(32, '255,214,110');
+  const WB = lin(0, HZ, 0, SH, [[0, '#2a1d66'], [.3, '#120c36'], [1, '#04020e']]), WO = lin(0, HZ, 0, SH, [[0, 'rgba(3,2,12,.1)'], [1, 'rgba(3,2,12,.6)']]), HL = lin(0, HZ - 4, 0, HZ + 26, [[0, 'rgba(130,100,230,0)'], [.2, 'rgba(150,120,255,.35)'], [1, 'rgba(150,120,255,0)']]);
+  const GRADE = lin(0, 0, 0, SH, [[0, 'rgba(50,30,140,.55)'], [1, 'rgba(110,60,190,.2)']]), VIG = rad(SW / 2, SH * .55, SW * .3, SW * .85, [[0, 'rgba(0,0,0,0)'], [1, 'rgba(2,0,10,.65)']]);
+  const LB = lin(0, 0, 0, -62, [[0, '#240a5c'], [1, '#6b32c8']]), LF = lin(0, 0, 0, -88, [[0, '#5a2bb8'], [.6, '#a77cff'], [1, '#f1e8ff']]), LI = lin(0, 0, 0, -56, [[0, '#8a4fe8'], [1, '#fff4ff']]);
+  const S = {};
+
+  const lotusShape = g => {
+    const pt = (a, L, W) => { g.save(); g.rotate(a * Math.PI / 180); g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(-W, -L * .15, -W * 1.15, -L * .75, 0, -L); g.bezierCurveTo(W * 1.15, -L * .75, W, -L * .15, 0, 0); g.fill(); g.stroke(); g.restore(); };
+    g.lineWidth = 1.1; g.strokeStyle = 'rgba(238,226,255,.55)';
+    g.fillStyle = LB; [-84, 84, -60, 60].forEach(a => pt(a, 62, 22));
+    g.fillStyle = LF; [-34, 34].forEach(a => pt(a, 78, 21)); pt(0, 88, 22);
+    g.fillStyle = LI; [-16, 16].forEach(a => pt(a, 56, 14));
+    g.fillStyle = '#ffd36b'; g.beginPath(); g.ellipse(0, -4, 9, 4, 0, 0, 7); g.fill();
+  };
+  const pads = Array.from({ length: 13 }, (_, i) => {
+    const z = lerp(.06, .96, (i + R(0, .7)) / 13), rx = lerp(18, 84, z), hx = R(60, 740), ox = cl((MX - hx) / 500, -.35, .35) * rx;
+    return { z, y: HZ + 26 + z * (SH - HZ - 70), hx, x: hx, rx, ry: rx * (.2 + z * .3), fl: i % 2 === 0 || z > .8, fs: rx * 1.15 / 86, bob: 0, bv: 0, tilt: 0, tv: 0, ph: R(0, 6.28), n: R(0, 6.28),
+      gp: rad(0, 0, 0, 1, [[0, '#000']]) && SCX.createRadialGradient(ox, -rx * .15, 0, 0, 0, rx) };
+  }).sort((a, b) => a.y - b.y);
+  pads.forEach(d => { d.gp.addColorStop(0, '#3a7a8c'); d.gp.addColorStop(.55, '#1d4a5e'); d.gp.addColorStop(1, '#0a1d2e'); });
+  const rip = []; const ripple = (x, y, a) => rip.push({ x, y, z: cl((y - HZ) / (SH - HZ), 0, 1), r: 0, a, max: 150 });
+  let ra = 1, rt = 0;
+  const gl = Array.from({ length: 70 }, () => ({ d: R(4, 360), dx: R(-1, 1), ph: R(0, 6.28), f: R(1.5, 4.5), w: R(8, 24) }));
+  const st = Array.from({ length: 140 }, () => ({ x: R(-20, SW + 20), y: Math.pow(Math.random(), 1.4) * (HZ - 60), a: R(.35, 1), s: R(.5, 1.7), f: R(.8, 3.5), ph: R(0, 6.28), c: Math.random() < .15 ? '255,210,170' : Math.random() < .25 ? '170,200,255' : '255,255,255' }));
+  const ss = { on: false, t: R(4, 9) };
+  const ff = Array.from({ length: 18 }, () => ({ x: R(20, SW - 20), alt: R(20, 160), gy: R(HZ + 50, SH - 30), h: R(0, 6.28), v: R(14, 34), f: R(.5, 1.4), ph: R(0, 6.28) }));
+  const reeds = [];
+  const lim = isMobile() ? 4 : 2;
+  for (let i = 0; i < 42; i++) { const left = i < 22; const b = mkBlade(left ? R(-10, 140) : R(660, 810), SH + 8, R(240, 470), R(5, 9), R(5, 11), '#07040f', 'rgba(170,150,255,.28)', Math.random() < .4 ? R(24, 38) : 0); reeds.push(b); }
+
+  const NS = Math.ceil((SH - HZ) / 4);
+  const frame = (g, t, dt, P, par, fr) => {
+    g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+    g.drawImage(sky, -SM - par * 4, 0);
+    g.fillStyle = WB; g.fillRect(0, HZ, SW, SH - HZ);
+    /* stars twinkle (atmospheric scintillation) + shooting star */
+    g.globalCompositeOperation = 'lighter';
+    for (const s of st) {
+      const tw = cl(.62 + .38 * Math.sin(t * s.f + s.ph) + .12 * Math.sin(t * s.f * 3.7 + s.ph * 2), .1, 1), a = s.a * tw, x = s.x - par * 5;
+      g.fillStyle = `rgba(${s.c},${a})`; g.fillRect(x, s.y, s.s, s.s);
+      if (s.s > 1.3) { g.globalAlpha = a * .5; g.drawImage(GSt, x - 8, s.y - 8, 16, 16); g.globalAlpha = 1; }
+    }
+    ss.t -= dt;
+    if (!ss.on && ss.t < 0) { const a = R(.35, .6), sp = R(500, 700); ss.on = true; ss.x = R(100, 700); ss.y = R(20, 150); ss.vx = Math.cos(a) * sp * (Math.random() < .5 ? 1 : -1); ss.vy = Math.sin(a) * sp; ss.life = 1; }
+    if (ss.on) {
+      ss.x += ss.vx * dt; ss.y += ss.vy * dt; ss.life -= dt * 1.4;
+      g.strokeStyle = lin(ss.x, ss.y, ss.x - ss.vx * .14, ss.y - ss.vy * .14, [[0, `rgba(255,255,255,${ss.life})`], [1, 'rgba(255,255,255,0)']]); g.lineWidth = 1.8; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(ss.x, ss.y); g.lineTo(ss.x - ss.vx * .14, ss.y - ss.vy * .14); g.stroke();
+      if (ss.life <= 0 || ss.y > HZ - 30) { ss.on = false; ss.t = R(7, 14); }
+    }
+    /* water: mirrored sky, distorted by travelling waves that grow toward the viewer */
+    g.globalCompositeOperation = 'source-over';
+    for (let i = 0; i < NS; i++) {
+      const d = i * 4, off = (.8 + d * .028) * (.6 * Math.sin(d * .09 - t * 1.5 + 2 * Math.sin(d * .021 + t * .4)) + .4 * Math.sin(d * .23 + t * 2.6));
+      g.globalAlpha = .9 - .52 * (d / (SH - HZ));
+      g.drawImage(skyF, 0, d * .9, W2, 3.6, -SM + off - par * 4, HZ + d, W2, 4);
+    }
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = 'lighter'; g.globalAlpha = .3; g.drawImage(GMc, MX - 95 - par * 4, HZ, 190, 380); g.globalAlpha = 1;
+    for (const q of gl) {
+      const a = Math.pow(Math.max(0, Math.sin(t * q.f + q.ph)), 3) * (1 - q.d / 400) * .9; if (a < .03) continue;
+      const x = MX + q.dx * (8 + q.d * .4) + Math.sin(q.d * .09 - t * 1.5) * (.8 + q.d * .028) - par * 4;
+      g.fillStyle = `rgba(238,228,255,${a})`; g.fillRect(x - q.w / 2, HZ + q.d, q.w * (.5 + q.d / 300), 1.7);
+    }
+    g.fillStyle = HL; g.fillRect(0, HZ - 4, SW, 30);
+    g.globalCompositeOperation = 'source-over'; g.fillStyle = WO; g.fillRect(0, HZ, SW, SH - HZ);
+    tile(g, fogA, 7, t, HZ - 95, .7, -par * 6); tile(g, fogB, -11, t, HZ - 38, .55, -par * 8);
+    /* ripples: expanding elliptical rings, from fish, the pointer and clicks */
+    ra -= dt; if (ra < 0) { ripple(R(80, 720), R(HZ + 30, SH - 40), R(.5, 1)); ra = R(1.2, 3.5); }
+    rt -= dt; if (P.in && P.y > HZ + 10 && Math.hypot(P.vx, P.vy) > 140 && rt < 0) { ripple(P.x, P.y, .6); rt = .16; }
+    for (let i = rip.length - 1; i >= 0; i--) {
+      const r = rip[i]; r.r += (46 + 40 * r.z) * dt; if (r.r > r.max) { rip.splice(i, 1); continue; }
+      const sz = .5 + r.z * 1.1, rat = .2 + r.z * .3, fade = Math.pow(1 - r.r / r.max, 1.6) * r.a, sh = -par * (10 + r.z * 22);
+      for (const [m, al] of [[1, 1], [.8, .55]]) {
+        const rx = r.r * m * sz;
+        g.lineWidth = 2.6 * sz; g.strokeStyle = `rgba(2,1,12,${fade * al * .55})`; g.beginPath(); g.ellipse(r.x + sh, r.y + 1.5 * sz, rx, rx * rat, 0, 0, 7); g.stroke();
+        g.lineWidth = 1.2 * sz; g.strokeStyle = `rgba(205,195,255,${fade * al * .6})`; g.beginPath(); g.ellipse(r.x + sh, r.y, rx, rx * rat, 0, 0, 7); g.stroke();
+      }
+    }
+    /* lotus pads: spring bob and tilt, pushed by passing ripples */
+    for (const d of pads) {
+      d.x = d.hx + Math.sin(t * .23 + d.ph) * 6 * (.4 + d.z);
+      for (const r of rip) {
+        const sz = .5 + r.z * 1.1, dist = Math.hypot(d.x - r.x, (d.y - r.y) / (.2 + r.z * .3)), f = r.a * (1 - r.r / r.max);
+        if (Math.abs(dist - r.r * sz) < 14 * sz) { d.bv += f * .9 * (.4 + d.z) * dt * 60; d.tv += Math.sign(d.x - r.x) * f * .02 * dt * 60; }
+      }
+      d.bv += (-42 * d.bob - 3.4 * d.bv) * dt; d.bob += d.bv * dt; d.tv += (-30 * d.tilt - 2.6 * d.tv) * dt; d.tilt += d.tv * dt;
+      const x = d.x - par * (10 + d.z * 22), y = d.y + d.bob;
+      g.save(); g.translate(x, y);
+      g.fillStyle = 'rgba(2,1,10,.45)'; g.beginPath(); g.ellipse(0, d.ry * .12, d.rx * 1.06, d.ry * 1.12, 0, 0, 7); g.fill();
+      if (d.fl) { g.save(); g.translate(0, d.ry * .1); g.scale(d.fs, -d.fs * .72); g.transform(1, 0, .07 * Math.sin(t * 1.8 + d.ph), 1, 0, 0); g.globalAlpha = .2; lotusShape(g); g.restore(); }
+      g.save(); g.scale(1, d.ry / d.rx); g.fillStyle = d.gp; g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, d.rx, d.n, d.n + Math.PI * 2 - .24); g.closePath(); g.fill();
+      g.strokeStyle = 'rgba(150,200,230,.13)'; g.lineWidth = 1; for (let k = 0; k < 8; k++) { const a = d.n + .3 + k * .76; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(a) * d.rx * .95, Math.sin(a) * d.rx * .95); g.stroke(); }
+      g.strokeStyle = 'rgba(160,190,230,.28)'; g.lineWidth = 1.4; g.beginPath(); g.arc(0, 0, d.rx, d.n, d.n + Math.PI * 2 - .24); g.stroke(); g.restore();
+      if (d.fl) {
+        g.save(); g.translate(0, -d.ry * .12); g.rotate(d.tilt);
+        g.globalCompositeOperation = 'lighter'; g.globalAlpha = .26 + .06 * Math.sin(t * .9 + d.ph); g.drawImage(GL, -d.rx * 1.2, -d.rx * 1.5, d.rx * 2.4, d.rx * 2.4);
+        g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.scale(d.fs * (1 + .015 * Math.sin(t * .7 + d.ph)), d.fs); lotusShape(g); g.restore();
+      }
+      g.restore();
+    }
+    /* fireflies: smooth wandering, blinking, mirrored in the water */
+    g.globalCompositeOperation = 'lighter';
+    for (const f of ff) {
+      f.h += nz(t * .6 + f.ph * 7) * 3 * dt; f.x += Math.cos(f.h) * f.v * dt + wind(f.x, t, .5) * 8 * dt; f.alt += Math.sin(f.h) * f.v * .6 * dt;
+      if (f.x < 10) f.h = R(-.8, .8); if (f.x > SW - 10) f.h = Math.PI + R(-.8, .8); if (f.alt < 12) f.h = R(.3, 1.2); if (f.alt > 190) f.h = R(-1.2, -.3);
+      const b = Math.pow(Math.max(0, Math.sin(t * f.f * 2 + f.ph)), 3); if (b < .02) continue;
+      const sc = .5 + ((f.gy - HZ) / (SH - HZ)) * .7, s = (10 + 22 * b) * sc, x = f.x - par * (10 + sc * 18), y = f.gy - f.alt;
+      g.globalAlpha = b * .95; g.drawImage(GF, x - s, y - s, s * 2, s * 2);
+      g.globalAlpha = b * .35; g.drawImage(GF, x - s, f.gy + f.alt * .75 - s * .5, s * 2, s);
+      g.globalAlpha = b; g.fillStyle = 'rgb(255,250,200)'; g.beginPath(); g.arc(x, y, 1.4 * sc, 0, 7); g.fill();
+    }
+    g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    for (const b of reeds) { stepBlade(b, t, dt, P, .7); drawBlade(g, b, -par * 30); }
+    post(g, S, fr, GRADE, VIG);
+  };
+  const poke = (x, y) => { if (y > HZ + 8) { ripple(x, y, 1.4); setTimeout(() => ripple(x, y, .9), 180); } else ss.t = 0; };
+  return { frame, poke };
+};
+
+/* ---------- Scene runner: one loop for both panes ---------- */
+let _raf = 0, _scenes = [];
+const sceneXY = (o, e) => {
+  const r = o.cv.getBoundingClientRect();
+  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) return null;
+  const k = Math.max(r.width / SW, r.height / SH);
+  return { x: (e.clientX - r.left - (r.width - SW * k) / 2) / k, y: (e.clientY - r.top - (r.height - SH * k)) / k, tp: (e.clientX - r.left) / r.width - .5 };
+};
+function startScenes() {
+  cancelAnimationFrame(_raf); _scenes = [];
+  document.querySelectorAll('#login canvas.cv').forEach(cv => _scenes.push({ cv, g: cv.getContext('2d'), s: BUILD[cv.dataset.s](), P: { x: 0, y: 0, vx: 0, vy: 0, lx: 0, ly: 0, in: false }, par: 0, tp: 0 }));
+  if (!_scenes.length) return;
+  const still = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  let last = performance.now(), t = 0, fr = 0;
+  const tick = now => {
+    if (!document.body.contains(_scenes[0].cv)) return;
+    const el = now - last;
+    if (!still && isMobile() && el < 30) { _raf = requestAnimationFrame(tick); return; }   // ~30 fps on phones to save battery
+    const dt = Math.min(.05, el / 1000 || .016); last = now; t += dt; fr++;
+    for (const o of _scenes) {
+      const P = o.P;
+      if (P.in) { P.vx = cl(lerp(P.vx, (P.x - P.lx) / dt, .35), -2500, 2500); P.vy = cl(lerp(P.vy, (P.y - P.ly) / dt, .35), -2500, 2500); } else { P.vx *= .8; P.vy *= .8; }
+      P.lx = P.x; P.ly = P.y; o.par = lerp(o.par, P.in ? o.tp : 0, 1 - Math.pow(.02, dt));
+      o.s.frame(o.g, t, dt, P, o.par, fr);
+    }
+    if (!still) _raf = requestAnimationFrame(tick);
+  };
+  _raf = requestAnimationFrame(tick);
+}
+$('#login').addEventListener('pointermove', e => {
+  for (const o of _scenes) { const p = sceneXY(o, e); if (!p) { o.P.in = false; continue; } if (!o.P.in) { o.P.lx = p.x; o.P.ly = p.y; } o.P.x = p.x; o.P.y = p.y; o.P.in = true; o.tp = p.tp; }
+});
+$('#login').addEventListener('pointerleave', () => _scenes.forEach(o => { o.P.in = false; }));
+$('#login').addEventListener('pointerdown', e => { for (const o of _scenes) { const p = sceneXY(o, e); if (p && o.s.poke) o.s.poke(p.x, p.y); } });
+/* Restart whenever the login screen is (re)built, stop when it is emptied after sign-in */
+new MutationObserver(() => startScenes()).observe($('#login'), { childList: true });
 /* ---------- Login ---------- */
 function buildLogin() {
   const acc = ACC.get();
-  $('#login').innerHTML = '<h1 class="lt">Who’s signing in?</h1><button type="button" class="lk" id="lkimp">Already have an account on another device?</button>' + ['her', 'him'].map(r => {
+  const both = acc.her && acc.him;
+  $('#login').innerHTML = '<h1 class="lt">Who’s signing in?</h1><div id="lkbar"><button type="button" class="lk" id="lkimp">Already have an account on another device?</button>' + (both ? '<button type="button" class="lk" id="lkout">Link another device</button>' : '') + '</div>' + ['her', 'him'].map(r => {
     const a = acc[r], g = r === 'her';
-    return `<section class="pane ${r}" data-r="${r}" tabindex="0"><div class="box"><div class="lg">${THEME[r].art()}</div><h2>${g ? 'Girlfriend' : 'Boyfriend'}</h2><p class="sub">${a ? 'Welcome back, ' + esc(a.name) : g ? 'Step into the lily garden' : 'Step into the midnight lotus'}</p>
+    return `<section class="pane ${r}" data-r="${r}" tabindex="0"><div class="scene" aria-hidden="true">${SCENE[r]()}</div><div class="box"><div class="lg">${THEME[r].art()}</div><h2>${g ? 'Girlfriend' : 'Boyfriend'}</h2><p class="sub">${a ? 'Welcome back, ' + esc(a.name) : g ? 'Step into the lily garden' : 'Step into the midnight lotus'}</p>
 <form data-r="${r}" autocomplete="off">${a ? '' : '<input name="name" placeholder="Your name" maxlength="24" required>'}<span class="pw"><input name="pw" type="password" placeholder="${a ? 'Passcode' : 'Create a passcode (6+ characters)'}" minlength="${a ? 1 : 6}" required autocomplete="${a ? 'current-password' : 'new-password'}">${EYE}</span><label class="keep"><input type="checkbox" name="keep"> Keep me signed in for 14 days on this device</label><div class="err" role="alert"></div><button class="go">${a ? 'Enter' : 'Create and enter'}</button><div class="lnk">${a ? '<button type="button" class="lk" data-reset>Forgot passcode?</button>' : ''}<button type="button" class="lk" data-back>Back</button></div></form><p class="tap">Tap to sign in</p></div></section>`;
   }).join('');
 }
@@ -862,12 +1396,19 @@ function pick(p) {
   const i = p && p.querySelector('input');
   i && setTimeout(() => i.focus(), 500);
 }
-
 async function importDevice() {
-  const s = await askSecret({ title: 'Link this device', msg: 'Paste the code from your other device.', label: 'Link code', ok: 'Import' });
+  let s = await askSecret({ title: 'Link this device', msg: 'Paste the code from your other device.', label: 'Link code', ok: 'Import' });
   if (!s) return;
+  s = s.trim();
+  if (/^[A-Za-z0-9]{4}-?[A-Za-z0-9]{4}$/.test(s)) {
+    try {
+      const ref = (await fbDb()).doc('links/' + s.replace('-', '').toUpperCase()), snap = await ref.get();
+      if (!snap.exists) throw 0;
+      s = snap.data().blob; ref.delete().catch(() => {});
+    } catch (e) { console.error('link lookup', e); return alert('That code isn’t valid or has expired.' + (e && e.code ? ' (' + e.code + ')' : '')); }
+  }
   try {
-    const d = dec(s), have = ACC.get();
+    const d = s.startsWith('v2.') ? unpackAcc(s) : dec(s), have = ACC.get();
     if (!d || typeof d.acc !== 'object') throw 0;
     for (const r of Object.keys(d.acc)) {
       const a = d.acc[r];
@@ -880,9 +1421,8 @@ async function importDevice() {
     ACC.set(have);
     for (const o of (Array.isArray(d.events) ? d.events : [])) { const c = clean(o); if (c) await DB.putL(c); }
     buildLogin(); toast('Account imported. You can sign in now.');
-  } catch (e) { alert('That code isn’t valid.'); }
+  } catch (e) { console.error('import', e); alert('That code isn’t valid.'); }
 }
-
 /* Forgot passcode: needs this account's recovery code (never deletes the account) */
 async function forgot(r) {
   const a = ACC.get(), x = a[r];
@@ -901,8 +1441,22 @@ async function forgot(r) {
   toast('Passcode changed. Sign in with the new one.');
 }
 
+async function exportDevice() {
+  if (waitMs()) return toast(tooMany());
+  const acc = ACC.get();
+  const v = await askSecret({ title: 'Link device', msg: 'Enter either passcode to create a link code.', label: 'Passcode', ok: 'Continue', check: async pw => {
+    if (waitMs()) return tooMany();
+    for (const r of ['her', 'him']) { const a = acc[r]; if (a && await kdf(pw, a.salt, a.it) === a.h) return ''; }
+    noteFail(); return waitMs() ? tooMany() : 'That passcode is incorrect.';
+  } });
+  if (v === null) return;
+  LS.d('ld-fail');
+  box('Link device', 'Copy this code, then on your other device choose “Already have an account on another device?” and paste it. It carries both accounts (sign-in only: dates sync on their own). Treat it like a password, and don’t share it.', await linkCode(), true);
+}
+
 $('#login').addEventListener('click', e => {
   if (e.target.closest('#lkimp')) return importDevice();
+  if (e.target.closest('#lkout')) return exportDevice();
   const p = e.target.closest('.pane');
   if (!p) return;
   if (e.target.closest('[data-back]')) return pick(null);
@@ -1038,13 +1592,46 @@ function showHelp() {
   $('#cx').onclick = close;
 }
 const HELP_HTML = `<h2>How to use</h2><div class="help">
-<p>Tap a section to open it.</p>
-<details open><summary>Plan a date</summary><div><ol><li>Tap a day on the calendar, or press <b>+</b> (<b>+ New date</b> on a computer).</li><li>Add a title, the time, place and notes, then tap <b>Save date</b>.</li><li>Tap a date on the calendar or in <b>Coming up</b> to edit or delete it.</li></ol><div class="tip">Dates are shared and update live: a change made on one phone or computer shows up on the other within moments. The dot next to your name says <b>Live</b> when it’s connected, and shows when your partner is here too. You also get a note when they add or change a date. A warning appears if two dates overlap.</div></div></details>
-<details><summary>Find your way around</summary><div><ul><li><b>‹ ›</b> change month, <b>Today</b> jumps back.</li><li>The colored chips filter by category (Date, School Works, Others).</li><li><b>Next up</b> shows your very next date.</li><li>On a phone, dots on a day mean there are dates. Tap a day to read them under the calendar, and swipe the calendar left or right to change month. <b>Menu</b> holds Profile, Backup and the rest.</li></ul></div></details>
-<details><summary>Use it on another phone or computer</summary><div><ol><li>Open this same page on the other device.</li><li>On the device where you’re signed in here, ...<details><summary>Keep a backup</summary><div><p>Tap <b>Backup</b> and copy the text to save your dates somewhere safe. To restore, paste it into the same box and tap <b>Import</b>. Restored dates are shared with your partner too.</p></div></details>
-<details><summary>Passcode and signing in</summary><div><ul><li>Your passcode needs 6 or more characters. It stays hidden as you type, and <b>Show</b> lets you check it.</li><li>When you create an account you get a <b>recovery code</b>. Write it down, it’s shown only once.</li><li>Forgot your passcode? Tap <b>Forgot passcode?</b> and enter the recovery code.</li><li><b>Keep me signed in</b> lasts 14 days on that device.</li><li>After several wrong tries you have to wait a little before trying again.</li></ul></div></details>
-<details><summary>Edit your profile</summary><div><ul><li>Tap <b>Profile</b> to change your name, passcode or recovery code.</li><li>Changing the passcode or recovery code needs your current passcode.</li><li>Changes apply to this device. On another device, make a new <b>Link device</b> code to update it.</li></ul></div></details>
-<details><summary>Log out and reset</summary><div><p><b>Log out</b> returns to the sign-in screen. <b>Reset data</b> deletes all dates for both of you, on every device, after you enter your passcode. It can’t be undone, so back up first.</p></div></details>
+<p class="lead">Tap a topic to open it.</p>
+
+<details open><summary>Plan a date</summary><div>
+<ol><li>Tap a day, or press <b>+</b>.</li><li>Add a title, time and place.</li><li>Tap <b>Save date</b>.</li></ol>
+<p>Tap any date to edit or delete it. You’ll get a warning if two dates overlap.</p>
+</div></details>
+
+<details><summary>Shared and live</summary><div>
+<p>Your dates are shared. A change on one device shows up on the other within moments, and you get a note when your partner adds or edits something.</p>
+<div class="tip">The dot by your name says <b>Live</b> when you’re connected.</div>
+</div></details>
+
+<details><summary>Find your way around</summary><div>
+<ul><li><b>‹ ›</b> change the month. <b>Today</b> jumps back.</li><li>The colored chips filter by category.</li><li><b>Next up</b> shows your next date.</li><li>On a phone, dots mean there are dates. Tap a day to read them, and swipe to change month.</li></ul>
+</div></details>
+
+<details><summary>Use another device</summary><div>
+<ol><li>Tap <b>Link device</b> (under <b>Menu</b> on a phone) and enter your passcode.</li><li>Copy the code.</li><li>On the other device, tap <b>Already have an account on another device?</b> and paste it.</li></ol>
+<p>The code carries both accounts. Your dates appear on their own.</p>
+<div class="tip">Treat the code like a password. Don’t share it.</div>
+</div></details>
+
+<details><summary>Backup</summary><div>
+<p>Tap <b>Backup</b> and copy the text to keep your dates safe. To restore, paste it back and tap <b>Import</b>.</p>
+</div></details>
+
+<details><summary>Passcode and signing in</summary><div>
+<ul><li>Use 6 or more characters. <b>Show</b> lets you check what you typed.</li><li>Save the <b>recovery code</b> you get at sign-up. It’s shown only once.</li><li>Forgot your passcode? Tap <b>Forgot passcode?</b> and enter the recovery code.</li><li><b>Keep me signed in</b> lasts 14 days on that device.</li><li>After several wrong tries, you’ll need to wait before trying again.</li></ul>
+</div></details>
+
+<details><summary>Edit your profile</summary><div>
+<p>Tap <b>Profile</b> to change your name, passcode or recovery code. Passcode and recovery changes need your current passcode.</p>
+<div class="tip">Changes apply to this device only.</div>
+</div></details>
+
+<details><summary>Log out and reset</summary><div>
+<p><b>Log out</b> returns you to the sign-in screen.</p>
+<p><b>Reset data</b> deletes all dates for both of you, on every device. It can’t be undone, so back up first.</p>
+</div></details>
+
 </div><div class="foot"><button class="btn pri" id="cx">Got it</button></div>`;
 $('#hlp').onclick = showHelp;
 /* ---------- Edit profile ---------- */

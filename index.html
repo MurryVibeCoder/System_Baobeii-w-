@@ -975,7 +975,7 @@ close(); render(); toast('Backup imported');
 
 $('#lnkdev').onclick = async () => {
 if (!await confirmPass('Link device', 'Enter your passcode to create a link code.')) return;
-box('Link device', 'Copy this code, then on your other device choose “Already have an account on another device?” and paste it. It copies your sign-in only: dates sync on their own. Treat it like a password, and don’t share it.', packAcc(ACC.get()));
+box('Link device', 'Copy this code, then on your other device choose “Already have an account on another device?” and paste it. It works once and expires in 5 minutes. It carries your sign-in only: dates sync on their own. Treat it like a password, and don’t share it.', await linkCode(), true);
 };
 
 $('#rst').onclick = async () => {

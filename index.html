@@ -610,6 +610,7 @@ const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 const tm = t => { if (!t) return ''; let [h, m] = t.split(':'); h = +h; return `${h % 12 || 12}:${m} ${h < 12 ? 'AM' : 'PM'}`; };
 const nice = d => new Date(d + 'T00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 const when = e => nice(e.date) + (e.start ? ' · ' + tm(e.start) : '');
+const isDone = e => e.done || e.date < ymd(new Date());
 const enc = o => btoa(unescape(encodeURIComponent(JSON.stringify(o))));
 const dec = s => JSON.parse(decodeURIComponent(escape(atob(s.trim()))));
 const lily = () => THEME[role].art();
@@ -893,7 +894,7 @@ for (let i = 0; i < 42; i++) {
 const d = new Date(st); d.setDate(st.getDate() + i);
 const k = ymd(d), ev = by[k] || [];
 h += `<div class="cell ${d.getMonth() !== view.getMonth() ? 'out' : ''} ${k === ymd(new Date()) ? 'today' : ''} ${k === sel ? 'sel' : ''}" data-d="${k}" tabindex="0" role="button" aria-label="${nice(k)}"><span class="n">${d.getDate()}</span>`
-+ ev.slice(0, lim).map(e => `<button class="pill ${e.done ? 'done' : ''}" data-id="${e.id}" style="--c:${col(e.cat)}" title="${esc(e.title)}${e.start ? ' · ' + tm(e.start) : ''}">${badge(e)}${esc(e.title)}</button>`).join('')
++ ev.slice(0, lim).map(e => `<button class="pill ${isDone(e) ? 'done' : ''}" data-id="${e.id}" style="--c:${col(e.cat)}" title="${esc(e.title)}${e.start ? ' · ' + tm(e.start) : ''}">${badge(e)}${esc(e.title)}</button>`).join('')
 + (ev.length > lim ? `<span class="more">+${ev.length - lim}</span>` : '') + '</div>';
 }
 $('#body').innerHTML = h + '</div>';
@@ -936,7 +937,7 @@ open(`<h2>${id ? 'Edit date' : 'New date'}</h2>${id && attrib(e) ? `<p class="at
 <label>Date<input type="date" name="date" required value="${e.date}"></label><label>Category<select name="cat">${Object.entries(CATS).map(([k, v]) => `<option value="${k}" ${k === e.cat ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
 <label>Starts<input type="time" name="start" value="${e.start || ''}"></label><label>Ends<input type="time" name="end" value="${e.end || ''}"></label>
 <label class="w">Place<input name="place" maxlength="80" value="${esc(e.place)}"></label><label class="w">Notes<textarea name="notes" rows="3">${esc(e.notes)}</textarea></label>
-${id ? `<label class="w chk"><input type="checkbox" name="done" ${e.done ? 'checked' : ''}> Mark as done</label>` : ''}
+${id ? `<label class="w chk"><input type="checkbox" name="done" ${isDone(e) ? 'checked' : ''}> Mark as done</label>` : ''}
 <div class="foot w">${id ? '<button type="button" class="btn del" id="rm">Delete date</button>' : ''}<button type="button" class="btn" id="cx">Cancel</button><button class="btn pri">Save date</button></div></form>`);
 $('#cx').onclick = close;
 if (id) $('#rm').onclick = () => remove(id);
@@ -1703,6 +1704,11 @@ else if (!e.shiftKey && (a === last || !md.contains(a))) { e.preventDefault(); f
 });
 $('#ov').addEventListener('click', e => { if (e.target === $('#ov')) close(); });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+/* Re-render when the day changes, so dates flip to done at midnight */
+let _day = ymd(new Date());
+const dayCheck = () => { const n = ymd(new Date()); if (role && n !== _day) { _day = n; render(); } };
+setInterval(dayCheck, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) dayCheck(); });
 </script>
 </body>
 </html>
